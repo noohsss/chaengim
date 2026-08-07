@@ -97,28 +97,26 @@
 - 온통청년의 인증키 승인형 API와 정부24의 목록·상세·지원조건 분리 구조를 각각 독립 어댑터로 구현한다. [온통청년 API 이용 안내](https://www.youthcenter.go.kr/cmnFooter/openapiIntro/oaiGuide), [정부24 API 변경 안내](https://www.data.go.kr/bbs/ntc/selectNotice.do?originId=NOTICE_0000000004156)
 - 실제 API 응답 샘플을 fixture로 보존해 필드 변경을 계약 테스트로 감지한다.
 - 공통 정책 형식은 제목, 요약, 지원 내용, 조건, 신청 기간, 신청 방법, 기관, 문의처, 신청 URL, 지역 코드, 공통 카테고리, 검색 키워드, 상태를 포함한다.
-- 출처별 식별자와 원본 payload는 별도로 보존한다.
+- 출처별 식별자와 원문 URL은 `policies.source_refs`에 보존하고 원본 payload는 DB에 저장하지 않는다.
 - 정책명, 주관기관, 신청기간, 지역이 높은 신뢰도로 일치할 때만 하나의 대표 정책으로 자동 통합한다.
-- 애매한 항목은 잘못 합치지 않고 별도 정책으로 둔다. 통합 관계는 원복 가능하게 저장한다.
-- 동기화는 출처별 upsert 후 대표 정책 재계산 방식으로 수행하며, 한 출처의 실패가 다른 출처의 성공 데이터를 제거하지 않게 한다.
+- 애매한 항목은 잘못 합치지 않고 별도 정책으로 둔다. 통합된 출처는 `source_refs`로 추적하고 다음 동기화에서 다시 계산할 수 있게 한다.
+- 동기화는 출처별 응답을 독립적으로 정규화한 뒤 대표 정책을 upsert하는 방식으로 수행하며, 한 출처의 실패가 다른 출처의 성공 데이터를 제거하지 않게 한다.
 - 정책의 핵심 필드가 바뀌면 버전 해시를 갱신하고 저장 사용자의 기존 AI 결과와 알림 판단에 사용한다.
 - 검색은 PostgreSQL 전문검색과 trigram 부분 일치를 조합해 제목, 키워드, 기관, 요약을 조회한다.
 
 ### 핵심 데이터 모델
 
-- `profiles`: 사용자 최소 프로필, 이메일 수신 여부
-- `policies`: 사용자에게 노출되는 대표 정책과 현재 버전
-- `policy_sources`: 출처, 외부 ID, 원본 payload, 동기화 시각
-- `policy_regions`: 전국·시도·시군구 공통 행정구역 코드
-- `saved_policies`: 사용자, 정책, 상태, 우선순위, 메모
-- `application_results`: 결과, 결과일, 결과 메모
-- `ai_results`: 분석 종류, 대상 정책 ID, 입력 버전 해시, 모델, 구조화 결과
-- `notifications`: 사용자, 정책, 종류, 기준일, 읽음 시각
-- `email_deliveries`: 예약·성공·실패 상태와 Resend 메시지 ID
-- `sync_runs`: 출처별 시작·종료·처리 건수·실패 내용
-- `policy_merge_links`: 대표 정책과 출처 정책의 통합 관계
+Supabase가 관리하는 `auth.users` 외에 애플리케이션 테이블은 다음 5개만 사용한다.
 
-사용자 소유 테이블에는 `auth.uid() = user_id` RLS를 적용한다. 공개 정책은 활성 데이터만 익명 조회를 허용하고, 외부 API 원본 payload와 운영 로그는 서버 역할만 접근한다.
+- `profiles`: 사용자 최소 프로필, 알림 이메일과 이메일 수신 여부
+- `policies`: 대표 정책, 지역 코드, 출처 참조, 현재 버전과 검색 벡터
+- `saved_policies`: 사용자별 상태, 우선순위, 메모와 신청 결과
+- `ai_results`: 분석 종류, 대상 정책 ID, 입력 해시, 모델과 구조화 결과
+- `notifications`: 웹 알림, 읽음 상태와 이메일 발송 상태
+
+출처별 외부 ID와 원문 URL은 `policies.source_refs`에, 지역은 `policies.region_codes`에 저장한다. 신청 결과는 `saved_policies`에, 이메일 발송 상태는 `notifications`에 함께 저장한다. 외부 API 원본 payload, 별도 동기화 이력과 통합 관계 테이블은 만들지 않고 구조화된 서버·Vercel 로그를 사용한다.
+
+사용자 소유 테이블에는 `auth.uid() = user_id` RLS를 적용한다. 활성 정책은 익명 조회를 허용하고, 비활성·보관 정책은 해당 정책을 챙긴 사용자만 조회할 수 있다. 정책 쓰기와 AI·알림 생성은 서버 역할만 수행한다.
 
 ### 서버 인터페이스
 

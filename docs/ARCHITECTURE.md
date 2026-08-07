@@ -139,7 +139,8 @@ flowchart LR
 │   ├── analysis
 │   └── compare
 ├── notifications
-└── settings
+├── settings
+└── design-system
 ```
 
 | 경로 | 접근 | 주요 책임 |
@@ -153,6 +154,7 @@ flowchart LR
 | `/my/compare` | 로그인 | 챙긴 정책 2~3개 선택, 최근 비교, 재비교 |
 | `/notifications` | 로그인 | 웹 알림 목록, 개별·전체 읽음 처리 |
 | `/settings` | 로그인 | 최소 프로필, 이메일 알림, 회원 탈퇴 |
+| `/design-system` | 내부 정적 문서 | 로고, 색상, 타이포, 아이콘과 제품 UI 적용 예시 |
 
 페이지 구성 원칙:
 
@@ -161,6 +163,15 @@ flowchart LR
 - 모달, 선택, 즉시 상태 변경처럼 상호작용이 필요한 부분만 Client Component로 분리한다.
 - 로그인이 필요한 페이지는 서버에서 세션을 검사하고 `/login?next=...`로 이동한다.
 - 비회원이 챙기기를 누르면 로그인 후 원래 정책에서 챙기기를 이어갈 수 있게 한다.
+
+### 브랜드와 UI 기반
+
+- 브랜드와 UI 규칙의 단일 기준은 `docs/DESIGN-SYSTEM.md`다.
+- Tailwind CSS와 shadcn/ui는 `src/app/globals.css`의 `background`, `foreground`, `primary`, `accent`, `muted`, `border`, `destructive`, `ring` 의미 토큰을 공통으로 사용한다.
+- 기본 서체는 npm 패키지로 자체 번들링한 Pretendard Variable이며 외부 폰트 CDN에 의존하지 않는다.
+- 브랜드 로고는 `BrandLogo`의 `default | compact`, `brand | monochrome` 공개 변형을 사용하고, 제품 아이콘은 2px 라운드 스트로크의 Lucide 아이콘을 기본으로 한다.
+- `/design-system`은 인증·DB·API 호출이 없는 정적 Server Component이며 내비게이션에서 숨기고 `noindex`로 유지한다.
+- MVP는 라이트 모드만 지원한다. 다크 모드와 전체 공용 컴포넌트 세트는 실제 제품 화면 요구가 생길 때 확장한다.
 
 ## 4. 데이터 모델
 
