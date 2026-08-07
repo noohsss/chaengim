@@ -31,3 +31,6 @@ next-env.d.ts
 
 # Vercel
 .vercel
+
+# local agent handoff
+/docs/SESSION-HANDOFF.md
