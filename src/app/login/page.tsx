@@ -68,10 +68,14 @@ export default async function LoginPage({
         <form action={signInWithGoogle} className="mt-8">
           <input name="next" type="hidden" value={nextPath} />
           <button
-            className="flex min-h-11 w-full items-center justify-center rounded-[var(--radius-control)] bg-primary px-4 py-3 font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+            className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-full border border-[#747775] bg-white px-3 py-3 text-sm font-medium leading-5 text-[#1f1f1f] transition-colors hover:bg-[#f8fafd] active:bg-[#eef2f7]"
             type="submit"
           >
-            Google로 시작하기
+            <span
+              aria-hidden="true"
+              className="size-5 bg-[url('https://developers.google.com/static/identity/images/g-logo.png')] bg-contain bg-center bg-no-repeat"
+            />
+            Google 계정으로 로그인
           </button>
         </form>
 
