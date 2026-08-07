@@ -2,12 +2,73 @@
 
 :root {
   color-scheme: light;
-  --background: #ffffff;
-  --foreground: #171717;
+
+  /* Soft Horizon brand palette */
+  --brand-sky: #e6f2ff;
+  --brand-cornflower: #4e8af7;
+  --brand-off-white: #fafaf7;
+  --brand-mint: #dff3ec;
+  --brand-light-gray: #eceff3;
+
+  /* Semantic color tokens */
+  --background: #fafaf7;
+  --foreground: #252a33;
+  --card: #ffffff;
+  --card-foreground: #252a33;
+  --primary: #2563d8;
+  --primary-hover: #1d5ccb;
+  --primary-pressed: #164faf;
+  --primary-foreground: #ffffff;
+  --secondary: #e6f2ff;
+  --secondary-foreground: #1d5ccb;
+  --accent: #dff3ec;
+  --accent-foreground: #176b55;
+  --muted: #eceff3;
+  --muted-foreground: #5d6675;
+  --border: #d7dee8;
+  --input: #c8d1dd;
+  --ring: #2563d8;
+  --destructive: #c7353f;
+  --destructive-foreground: #ffffff;
+
+  /* Shape, rhythm, and typography */
+  --radius: 0.75rem;
+  --radius-control: 0.625rem;
+  --space-unit: 0.25rem;
+  --icon-stroke-width: 2;
+  --font-brand: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --font-sans: var(--font-brand);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
 * {
   box-sizing: border-box;
+  border-color: var(--border);
 }
 
 html,
@@ -19,5 +80,27 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-brand);
+  font-size: 1rem;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ring) 42%, transparent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--brand-sky);
+  color: var(--foreground);
 }
