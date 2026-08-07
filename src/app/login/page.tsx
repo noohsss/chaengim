@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { getSafeNextPath } from "@/lib/auth/safe-next-path";
 
-import { signInWithKakao } from "./actions";
+import { signInWithGoogle } from "./actions";
 
 export const metadata: Metadata = {
   title: "로그인 | 챙김",
@@ -17,7 +17,7 @@ type LoginPageProps = Readonly<{
 const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   oauth_callback_failed:
     "로그인을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.",
-  oauth_start_failed: "카카오 로그인을 시작하지 못했어요. 다시 시도해 주세요.",
+  oauth_start_failed: "Google 로그인을 시작하지 못했어요. 다시 시도해 주세요.",
 };
 
 function getErrorMessage(
@@ -52,7 +52,7 @@ export default async function LoginPage({
             필요한 혜택을 계속 챙겨 보세요
           </h1>
           <p className="mt-2 text-sm leading-5 text-muted-foreground">
-            카카오 계정으로 간편하게 로그인할 수 있어요.
+            Google 계정으로 간편하게 로그인할 수 있어요.
           </p>
         </div>
 
@@ -65,13 +65,13 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        <form action={signInWithKakao} className="mt-8">
+        <form action={signInWithGoogle} className="mt-8">
           <input name="next" type="hidden" value={nextPath} />
           <button
             className="flex min-h-11 w-full items-center justify-center rounded-[var(--radius-control)] bg-primary px-4 py-3 font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
             type="submit"
           >
-            카카오로 시작하기
+            Google로 시작하기
           </button>
         </form>
 

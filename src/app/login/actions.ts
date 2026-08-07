@@ -14,7 +14,7 @@ import {
 import { getPublicEnv } from "@/lib/env/public";
 import { createClient } from "@/lib/supabase/server";
 
-export async function signInWithKakao(formData: FormData): Promise<never> {
+export async function signInWithGoogle(formData: FormData): Promise<never> {
   const env = getPublicEnv();
   const nextPath = getSafeNextPath(formData.get("next"));
   const callbackUrl = new URL("/auth/callback", env.NEXT_PUBLIC_APP_URL);
@@ -30,7 +30,7 @@ export async function signInWithKakao(formData: FormData): Promise<never> {
   });
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "kakao",
+    provider: "google",
     options: {
       redirectTo: callbackUrl.toString(),
     },

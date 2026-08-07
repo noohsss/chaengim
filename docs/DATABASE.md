@@ -53,7 +53,7 @@ auth.users
 
 ## 4. `profiles`
 
-카카오 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
+OAuth 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
 
 ### 컬럼
 
@@ -86,7 +86,7 @@ auth.users
 - RLS 활성화
 - `authenticated`: 본인 행만 `SELECT`
 - `authenticated`: 본인 행의 허용된 프로필 필드만 `UPDATE`
-- `INSERT`: 카카오 가입 후 Auth 트리거에서 처리
+- `INSERT`: OAuth 가입 후 Auth 트리거에서 처리
 - `DELETE`: 회원 탈퇴 서버 로직과 Auth cascade에서 처리
 - 클라이언트는 `notification_email_verified_at`을 수정할 수 없다.
 
@@ -350,7 +350,7 @@ policy_changed:{policyId}:{versionHash}
    - 필요한 extension과 enum
    - 5개 테이블과 제약조건
    - 검색·unique·외래키 인덱스
-   - 카카오 가입 프로필 생성 및 `updated_at` 트리거
+   - OAuth 가입 프로필 생성 및 `updated_at` 트리거
    - RLS와 테이블·컬럼별 GRANT
 2. `20260807151300_harden_mvp_schema.sql`
    - Auth 트리거 함수의 클라이언트 실행 권한 제거

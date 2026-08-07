@@ -6,7 +6,7 @@
 
 ## 1. 전체 구조
 
-챙김은 Next.js App Router 기반의 반응형 웹 애플리케이션이다. 공개 정책 탐색은 로그인 없이 제공하고, 챙기기·상태 관리·AI·알림 기능은 카카오 로그인 사용자에게 제공한다.
+챙김은 Next.js App Router 기반의 반응형 웹 애플리케이션이다. 공개 정책 탐색은 로그인 없이 제공하고, 챙기기·상태 관리·AI·알림 기능은 Google 로그인 사용자에게 제공한다.
 
 ```mermaid
 flowchart LR
@@ -41,7 +41,7 @@ flowchart LR
 
 책임:
 
-- Supabase Auth를 통한 카카오 OAuth 로그인
+- Supabase Auth를 통한 Google OAuth 로그인
 - 로그인 이전 경로 복귀
 - 출생연도, 거주지역, 취업·재학 상태 관리
 - 알림 이메일과 수신 동의 관리
@@ -147,7 +147,7 @@ flowchart LR
 |---|---|---|
 | `/` | 공개 | 정책 검색, 카테고리·지역 필터, 정렬, 페이지네이션 |
 | `/policies/[id]` | 공개 | 정책 상세, 출처, 신청 링크, 챙기기 |
-| `/login` | 공개 | 카카오 로그인 시작, `next` 복귀 경로 유지 |
+| `/login` | 공개 | Google 로그인 시작, `next` 복귀 경로 유지 |
 | `/auth/callback` | 공개 콜백 | OAuth 코드 교환, 세션 생성, 안전한 내부 경로로 복귀 |
 | `/my` | 로그인 | 내 챙김 목록, 상태·우선순위·메모·결과 관리 |
 | `/my/analysis` | 로그인 | 최근 챙김 분석 조회, 오래됨 표시, 재분석 |
@@ -194,7 +194,7 @@ erDiagram
 - `notification_email`, `notification_email_verified_at`, `email_opt_in`
 - `created_at`, `updated_at`
 
-카카오 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고 허용된 필드만 수정한다.
+OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고 허용된 필드만 수정한다.
 
 ### `policies`
 
@@ -239,7 +239,7 @@ erDiagram
 
 | 영역 | 서버 | 클라이언트 |
 |---|---|---|
-| 인증 | OAuth 코드 교환, 세션 검증·갱신, 보호 경로 검사 | 카카오 로그인 시작, 로그인 상태 UI |
+| 인증 | OAuth 코드 교환, 세션 검증·갱신, 보호 경로 검사 | Google 로그인 시작, 로그인 상태 UI |
 | 정책 조회 | 검색 조건 검증, DB 조회, 공개 범위 적용 | 검색어·필터·정렬 입력, URL 상태 관리 |
 | 챙김 | 사용자 확인, 정책 존재 확인, 변경 저장 | 상태·우선순위·메모·결과 입력과 낙관적 UI |
 | 프로필 | 입력 검증, 이메일 인증 상태 관리, 탈퇴 처리 | 프로필 폼과 수신 동의 표시 |
@@ -371,7 +371,7 @@ sequenceDiagram
 
 ## 8. 현재 결정 사항
 
-- 로그인은 카카오 OAuth만 지원한다.
+- 로그인은 Google OAuth만 지원한다.
 - 공공 정책 데이터는 매일 한 번 동기화한다.
 - 외부 API 원본 payload와 운영 이력은 DB에 저장하지 않는다.
 - 앱 테이블은 `profiles`, `policies`, `saved_policies`, `ai_results`, `notifications`만 사용한다.
