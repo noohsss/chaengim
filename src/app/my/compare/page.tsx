@@ -49,7 +49,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">지원 내용, 조건, 기간의 차이를 정리해 드려요. 최종 자격은 공식 기관에서 확인해 주세요.</p>
         </header>
 
-        {status ? <p className={`mt-4 text-sm ${status === "completed" ? "text-accent-foreground" : "text-destructive"}`} role={status === "completed" ? "status" : "alert"}>{status === "completed" ? "최신 비교를 반영했어요." : status === "invalid_selection" ? "정책을 2~3개 선택해 주세요." : status === "no_saved_policies" ? "먼저 비교할 정책을 챙겨 주세요." : "비교를 완료하지 못했어요. 잠시 후 다시 시도해 주세요."}</p> : null}
+        {status ? <p className={`mt-4 text-sm ${status === "completed" ? "text-accent-foreground" : "text-destructive"}`} role={status === "completed" ? "status" : "alert"}>{status === "completed" ? "최신 비교를 반영했어요." : status === "invalid_selection" ? "정책을 2~3개 선택해 주세요." : status === "no_saved_policies" ? "먼저 비교할 정책을 챙겨 주세요." : status === "rate_limited" ? "요청이 많아요. 잠시 후 다시 시도해 주세요." : "비교를 완료하지 못했어요. 잠시 후 다시 시도해 주세요."}</p> : null}
 
         <section className="ui-card mt-8 p-6 sm:p-8">
           <form action={requestComparison}>

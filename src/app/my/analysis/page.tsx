@@ -46,7 +46,7 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">챙긴 정책과 관리 정보를 바탕으로 다음 행동을 정리합니다. 최종 자격과 신청 결과는 공식 기관에서 확인해 주세요.</p>
         </header>
 
-        {status && status !== "completed" ? <p className="mt-4 text-sm text-destructive" role="alert">{status === "no_saved_policies" ? "먼저 정책을 챙겨 주세요." : status === "configuration" ? "AI 분석 설정이 아직 준비되지 않았어요." : "분석을 완료하지 못했어요. 잠시 후 다시 시도해 주세요."}</p> : null}
+        {status && status !== "completed" ? <p className="mt-4 text-sm text-destructive" role="alert">{status === "no_saved_policies" ? "먼저 정책을 챙겨 주세요." : status === "configuration" ? "AI 분석 설정이 아직 준비되지 않았어요." : status === "rate_limited" ? "요청이 많아요. 잠시 후 다시 시도해 주세요." : "분석을 완료하지 못했어요. 잠시 후 다시 시도해 주세요."}</p> : null}
         {status === "completed" ? <p className="mt-4 text-sm text-accent-foreground" role="status">최신 분석을 반영했어요.</p> : null}
 
         <section className="ui-card mt-8 p-6 sm:p-8">

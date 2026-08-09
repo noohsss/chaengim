@@ -11,6 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { buildPolicyFact, sortPolicyFactsForAction, type PolicyFact } from "@/server/policies/policy-facts";
 import { todayInSeoul } from "@/server/policies/policy-lifecycle";
 import { getProfileForUser } from "@/server/profile/profile-repository";
+import { AI_REQUEST_WINDOW_MS, isAiRequestRateLimited } from "./request-policy";
 
 const userIdSchema = z.uuid();
 const analysisRowSchema = z.object({
@@ -107,7 +108,7 @@ export type AnalysisView = Readonly<{
 }>;
 
 export class AnalysisError extends Error {
-  constructor(readonly code: "authentication_required" | "no_saved_policies" | "configuration" | "generation_failed" | "invalid_response" | "database_error", message: string) {
+  constructor(readonly code: "authentication_required" | "no_saved_policies" | "configuration" | "generation_failed" | "invalid_response" | "rate_limited" | "database_error", message: string) {
     super(message);
     this.name = "AnalysisError";
   }
@@ -226,7 +227,10 @@ async function generateAnalysis(input: unknown): Promise<AnalysisResult> {
 }
 
 async function getLatestResult(client: SupabaseClient, userId: string, inputHash: string, policyTitles: Readonly<Record<string, string>>, policyFacts: readonly PolicyFact[], profileMissingFields: readonly string[]): Promise<AnalysisView | undefined> {
-  const { data, error } = await client.from("ai_results").select("created_at,input_hash,model_name,policy_ids,result").eq("user_id", userId).eq("result_type", "analysis").order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const exact = await client.from("ai_results").select("created_at,input_hash,model_name,policy_ids,result").eq("user_id", userId).eq("result_type", "analysis").eq("input_hash", inputHash).maybeSingle();
+  if (exact.error) throw new AnalysisError("database_error", "최근 분석 결과를 불러오지 못했습니다");
+  const latest = exact.data ? exact : await client.from("ai_results").select("created_at,input_hash,model_name,policy_ids,result").eq("user_id", userId).eq("result_type", "analysis").order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const { data, error } = latest;
   if (error) throw new AnalysisError("database_error", "최근 분석 결과를 불러오지 못했습니다");
   if (!data) return undefined;
   const parsed = analysisRowSchema.safeParse(data);
@@ -258,14 +262,27 @@ export async function runAnalysis(client: SupabaseClient): Promise<AnalysisView>
   const input = getInput(rows, profile);
   const inputHash = hashInput(input);
   const policyIds = new Set(rows.map((row) => row.policy_id));
+  const policyTitles = Object.fromEntries(rows.map((row) => [row.policy_id, row.policies?.title ?? "정책"]));
+  const policyFacts = buildFacts(rows);
+  const profileMissingFields = getProfileMissingFields(profile);
+  const adminClient = createAdminClient();
+  const cached = await getLatestResult(adminClient, userId, inputHash, policyTitles, policyFacts, profileMissingFields);
+  if (cached && !cached.isStale) return cached;
+  const { data: recentRequests, error: recentRequestsError } = await adminClient
+    .from("ai_results")
+    .select("created_at")
+    .eq("user_id", userId)
+    .gte("created_at", new Date(Date.now() - AI_REQUEST_WINDOW_MS).toISOString());
+  if (recentRequestsError) throw new AnalysisError("database_error", "AI 요청 상태를 확인하지 못했습니다");
+  const requestTimes = z.array(z.object({ created_at: z.iso.datetime({ offset: true }) })).safeParse(recentRequests);
+  if (!requestTimes.success) throw new AnalysisError("database_error", "AI 요청 상태 형식이 올바르지 않습니다");
+  if (isAiRequestRateLimited(requestTimes.data.map((request) => request.created_at))) throw new AnalysisError("rate_limited", "잠시 후 다시 AI 분석을 요청해 주세요");
   const result = validateCitations(await generateAnalysis(input), policyIds);
   const env = getGeminiEnv();
-  const adminClient = createAdminClient();
   const { data, error } = await adminClient.from("ai_results").upsert({ user_id: userId, result_type: "analysis", policy_ids: [...policyIds], input_hash: inputHash, model_name: env.GEMINI_MODEL, result }, { onConflict: "user_id,result_type,input_hash" }).select("created_at,input_hash,model_name,policy_ids,result").single();
   if (error) throw new AnalysisError("database_error", "분석 결과를 저장하지 못했습니다");
   const parsed = analysisRowSchema.safeParse(data);
   const parsedResult = parsed.success ? analysisResultSchema.safeParse(parsed.data.result) : { success: false as const };
   if (!parsed.success || !parsedResult.success) throw new AnalysisError("database_error", "저장된 분석 결과 형식이 올바르지 않습니다");
-  const policyTitles = Object.fromEntries(rows.map((row) => [row.policy_id, row.policies?.title ?? "정책"]));
-  return { createdAt: parsed.data.created_at, isStale: false, modelName: parsed.data.model_name, policyTitles, policyFacts: buildFacts(rows), profileMissingFields: getProfileMissingFields(profile), result: parsedResult.data };
+  return { createdAt: parsed.data.created_at, isStale: false, modelName: parsed.data.model_name, policyTitles, policyFacts, profileMissingFields, result: parsedResult.data };
 }

@@ -245,6 +245,7 @@ OAuth 로그인 사용자의 최소 프로필이다. 기존 마이그레이션�
 
 - unique `(user_id, result_type, input_hash)`
 - `(user_id, result_type, created_at DESC)`: 최근 결과 조회
+- 동일 입력 해시 결과는 이 테이블의 unique 키로 재사용하며, 최근 `created_at` 결과 수를 기준으로 사용자별 AI 요청 빈도를 제한한다. 실패한 Gemini 요청은 결과 행을 만들지 않으므로 빈도 제한 대상에 포함되지 않는다.
 - 현재 조회 흐름에 필요하지 않은 `policy_ids` GIN 인덱스는 만들지 않는다.
 
 ### RLS와 권한

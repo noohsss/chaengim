@@ -12,6 +12,7 @@ import { getProfileForUser } from "@/server/profile/profile-repository";
 import { replaceYouthCenterEligibilityCodes } from "@/server/policies/adapters/normalize-utils";
 import { buildPolicyComparisonRows, buildPolicyFact, type PolicyComparisonRow, type PolicyFact } from "@/server/policies/policy-facts";
 import { todayInSeoul } from "@/server/policies/policy-lifecycle";
+import { AI_REQUEST_WINDOW_MS, isAiRequestRateLimited } from "./request-policy";
 
 import { listSavedPoliciesForAi, type SavedAnalysisRow } from "./analysis";
 import { normalizeComparisonText } from "./comparison-text";
@@ -78,7 +79,7 @@ export type ComparisonView = Readonly<{
 }>;
 
 export class ComparisonError extends Error {
-  constructor(readonly code: "authentication_required" | "invalid_selection" | "no_saved_policies" | "configuration" | "generation_failed" | "invalid_response" | "database_error", message: string) {
+  constructor(readonly code: "authentication_required" | "invalid_selection" | "no_saved_policies" | "configuration" | "generation_failed" | "invalid_response" | "rate_limited" | "database_error", message: string) {
     super(message);
     this.name = "ComparisonError";
   }
@@ -226,13 +227,25 @@ export async function runComparison(client: SupabaseClient, policyIds: readonly 
   const inputHash = hashInput(input);
   const policyIdSet = new Set(selected.map((row) => row.policy_id));
   const titles = Object.fromEntries(selected.map((row) => [row.policy_id, row.policies?.title ?? "정책"]));
+  const facts = buildFacts(selected);
+  const adminClient = createAdminClient();
+  const cached = await getLatestResult(adminClient, userId, inputHash, selected.map((row) => row.policy_id), titles, facts);
+  if (cached && !cached.isStale) return cached;
+  const { data: recentRequests, error: recentRequestsError } = await adminClient
+    .from("ai_results")
+    .select("created_at")
+    .eq("user_id", userId)
+    .gte("created_at", new Date(Date.now() - AI_REQUEST_WINDOW_MS).toISOString());
+  if (recentRequestsError) throw new ComparisonError("database_error", "AI 요청 상태를 확인하지 못했습니다");
+  const requestTimes = z.array(z.object({ created_at: z.iso.datetime({ offset: true }) })).safeParse(recentRequests);
+  if (!requestTimes.success) throw new ComparisonError("database_error", "AI 요청 상태 형식이 올바르지 않습니다");
+  if (isAiRequestRateLimited(requestTimes.data.map((request) => request.created_at))) throw new ComparisonError("rate_limited", "잠시 후 다시 AI 비교를 요청해 주세요");
   const result = await generateComparison(input, policyIdSet, titles);
   const env = getGeminiEnv();
-  const { data, error } = await createAdminClient().from("ai_results").upsert({ user_id: userId, result_type: "comparison", policy_ids: [...policyIdSet], input_hash: inputHash, model_name: env.GEMINI_MODEL, result }, { onConflict: "user_id,result_type,input_hash" }).select("created_at,input_hash,model_name,policy_ids,result").single();
+  const { data, error } = await adminClient.from("ai_results").upsert({ user_id: userId, result_type: "comparison", policy_ids: [...policyIdSet], input_hash: inputHash, model_name: env.GEMINI_MODEL, result }, { onConflict: "user_id,result_type,input_hash" }).select("created_at,input_hash,model_name,policy_ids,result").single();
   if (error) throw new ComparisonError("database_error", "비교 결과를 저장하지 못했습니다");
   const parsed = resultRowSchema.safeParse(data);
   const parsedResult = parsed.success ? comparisonResultSchema.safeParse(parsed.data.result) : { success: false as const };
   if (!parsed.success || !parsedResult.success) throw new ComparisonError("database_error", "저장된 비교 결과 형식이 올바르지 않습니다");
-  const facts = buildFacts(selected);
   return { createdAt: parsed.data.created_at, isStale: false, modelName: parsed.data.model_name, policyTitles: titles, policyFacts: facts, sourceRows: buildPolicyComparisonRows(facts), result: parsedResult.data };
 }
