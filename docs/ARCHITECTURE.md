@@ -15,22 +15,19 @@ flowchart LR
     S["Supabase Auth + PostgreSQL"]
     Y["온통청년 API"]
     A["Gemini API"]
-    R["Resend"]
 
     U -->|"페이지 조회·사용자 입력"| N
     N -->|"세션·정책·사용자 데이터"| S
     N -->|"일일 정책 동기화"| Y
     N -->|"분석·비교 요청"| A
-    N -->|"마감 이메일"| R
-    R -->|"이메일"| U
 ```
 
 핵심 원칙:
 
-- 브라우저는 외부 공공 API, Gemini, Resend를 직접 호출하지 않는다.
+- 브라우저는 외부 공공 API와 Gemini를 직접 호출하지 않는다.
 - Supabase 서비스 역할 키와 모든 외부 API 키는 서버에서만 사용한다.
 - 공개 정책과 사용자 데이터의 접근 통제는 Supabase RLS를 마지막 방어선으로 사용한다.
-- 운영용 데이터 모델을 별도로 만들지 않고 Vercel·Supabase·Resend 로그를 활용한다.
+- 운영용 데이터 모델을 별도로 만들지 않고 Vercel·Supabase 로그를 활용한다.
 - 외부 정책 원본 전체는 저장하지 않고 정규화된 정책과 출처 참조만 보존한다.
 - 온통청년 정책 동기화는 `https://www.youthcenter.go.kr/go/ythip/getPlcy`에 `apiKeyNm`, `pageNum`, `pageSize`, `rtnType=json`을 사용하고 마지막 페이지까지 순회한다.
 
@@ -43,7 +40,7 @@ flowchart LR
 - Supabase Auth를 통한 Google OAuth 로그인
 - 로그인 이전 경로 복귀
 - 출생연도, 거주지역, 취업·재학 상태 관리
-- 알림 이메일과 수신 동의 관리
+- 웹 알림 생성과 읽음 상태 관리
 - 회원 탈퇴 및 사용자 데이터 연쇄 삭제
 
 경계:
@@ -103,14 +100,14 @@ flowchart LR
 책임:
 
 - 헤더 알림함과 읽음 상태
-- 마감 7일 전·1일 전 웹 알림과 이메일
+- 마감 7일 전·1일 전 웹 알림
 - 저장 정책의 주요 정보 변경 알림
-- 동일 이벤트의 중복 생성·발송 방지
+- 동일 이벤트의 중복 생성 방지
 
 경계:
 
 - 브라우저 푸시는 제공하지 않는다.
-- 웹 알림과 이메일 발송 상태를 `notifications` 한 테이블에서 관리한다.
+- 웹 알림과 읽음 상태를 `notifications` 한 테이블에서 관리한다.
 
 ### 정책 동기화
 
@@ -152,7 +149,7 @@ flowchart LR
 | `/my/analysis` | 로그인 | 최근 챙김 분석 조회, 오래됨 표시, 재분석 |
 | `/my/compare` | 로그인 | 챙긴 정책 2~3개 선택, 최근 비교, 재비교 |
 | `/notifications` | 로그인 | 웹 알림 목록, 개별·전체 읽음 처리 |
-| `/settings` | 로그인 | 최소 프로필, 이메일 알림, 회원 탈퇴 |
+| `/settings` | 로그인 | 최소 프로필, 회원 탈퇴 |
 | `/design-system` | 내부 정적 문서 | 로고, 색상, 타이포, 아이콘과 제품 UI 적용 예시 |
 
 페이지 구성 원칙:
@@ -197,7 +194,7 @@ erDiagram
 - `notification_email`, `notification_email_verified_at`, `email_opt_in`
 - `created_at`, `updated_at`
 
-OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고 허용된 필드만 수정한다.
+OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고 허용된 필드만 수정한다. 이메일 관련 필드는 선행 스키마와의 호환을 위해 남아 있지만 이번 MVP에서는 사용하지 않는다.
 
 ### `policies`
 
@@ -236,7 +233,7 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 - `email_status`, `email_sent_at`, `email_error`
 - `created_at`
 
-`(user_id, event_key)` 유일 제약으로 웹 알림과 이메일 발송의 멱등성을 보장한다. 별도 이메일 발송 이력 테이블을 사용하지 않는다.
+`(user_id, event_key)` 유일 제약으로 웹 알림 생성의 멱등성을 보장한다. 이메일 발송과 별도 이메일 이력은 이번 MVP 범위에 포함하지 않는다.
 
 ## 5. 서버와 클라이언트 책임
 
@@ -245,9 +242,9 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 | 인증 | OAuth 코드 교환, 세션 검증·갱신, 보호 경로 검사 | Google 로그인 시작, 로그인 상태 UI |
 | 정책 조회 | 검색 조건 검증, DB 조회, 공개 범위 적용 | 검색어·필터·정렬 입력, URL 상태 관리 |
 | 챙김 | 사용자 확인, 정책 존재 확인, 변경 저장 | 상태·우선순위·메모·결과 입력과 낙관적 UI |
-| 프로필 | 입력 검증, 이메일 인증 상태 관리, 탈퇴 처리 | 프로필 폼과 수신 동의 표시 |
+| 프로필 | 입력 검증, 탈퇴 처리 | 프로필 폼 |
 | AI | 입력 조회·정제, 해시 계산, Gemini 호출, Zod 검증·저장 | 대상 선택, 실행 요청, 로딩·오류·결과 표시 |
-| 알림 | 이벤트 생성, 중복 방지, Resend 발송, 상태 저장 | 알림 목록, 읽음 요청, 마감 배지 표시 |
+| 알림 | 이벤트 생성, 중복 방지, 상태 저장 | 알림 목록, 읽음 요청, 마감 배지 표시 |
 | 동기화 | 외부 API 호출, 정규화, 통합, upsert, 변경 감지 | 책임 없음 |
 
 서버 전용 요소:
@@ -255,7 +252,6 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 - Supabase `service_role` 키
 - 온통청년 인증키
 - Gemini API 키
-- Resend API 키
 - Vercel Cron secret
 - 외부 API 어댑터와 정규화·중복 통합 로직
 
@@ -264,7 +260,7 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 - 공개 Supabase URL과 publishable key
 - RLS가 적용된 공개 정책 읽기
 - 로그인 사용자의 프로필·챙김·알림 읽음 상태 변경
-- 서버 Action 또는 Route Handler를 통한 AI·이메일·탈퇴 요청
+- 서버 Action 또는 Route Handler를 통한 AI·탈퇴 요청
 
 ## 6. 외부 API 연동 위치
 
@@ -377,6 +373,6 @@ sequenceDiagram
 - 외부 API 원본 payload와 운영 이력은 DB에 저장하지 않는다.
 - 앱 테이블은 `profiles`, `policies`, `saved_policies`, `ai_results`, `notifications`만 사용한다.
 - AI는 `gemini-3.5-flash-lite`를 서버에서 호출한다.
-- 이메일은 Resend로 마감 7일 전과 1일 전에 발송한다.
+- 이메일 알림과 Resend 연동은 후속 범위로 미루고, MVP에서는 웹 알림만 생성한다.
 - 모바일과 데스크톱을 동일 비중으로 지원한다.
 - 관리자 화면, 행동 분석, 브라우저 푸시, 서비스 내 신청은 MVP에서 제외한다.
