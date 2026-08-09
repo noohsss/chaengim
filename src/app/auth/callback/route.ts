@@ -7,7 +7,6 @@ import {
   createLoginPath,
   getSafeNextPathFromCookie,
 } from "@/lib/auth/safe-next-path";
-import { getPublicEnv } from "@/lib/env/public";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
@@ -43,7 +42,7 @@ function createNoStoreRedirect(
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const env = getPublicEnv();
+  const appUrl = request.nextUrl.origin;
   const code = request.nextUrl.searchParams.get("code");
   const nextPath = getSafeNextPathFromCookie(
     request.cookies.get(AUTH_NEXT_COOKIE_NAME)?.value,
@@ -55,7 +54,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (!code) {
     return createNoStoreRedirect(
       createLoginPath(nextPath, "oauth_callback_failed"),
-      env.NEXT_PUBLIC_APP_URL,
+      appUrl,
       hasAccountDeletionIntent,
     );
   }
@@ -66,7 +65,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (error) {
     return createNoStoreRedirect(
       createLoginPath(nextPath, "oauth_callback_failed"),
-      env.NEXT_PUBLIC_APP_URL,
+      appUrl,
       hasAccountDeletionIntent,
     );
   }
@@ -88,7 +87,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       await supabase.auth.signOut();
       return createNoStoreRedirect(
         createLoginPath("/", "account_delete_identity_mismatch"),
-        env.NEXT_PUBLIC_APP_URL,
+        appUrl,
         true,
       );
     }
@@ -102,14 +101,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       await supabase.auth.signOut();
       return createNoStoreRedirect(
         createLoginPath("/", "account_delete_failed"),
-        env.NEXT_PUBLIC_APP_URL,
+        appUrl,
         true,
       );
     }
 
     await supabase.auth.signOut();
-    return createNoStoreRedirect("/?status=account_deleted", env.NEXT_PUBLIC_APP_URL, true);
+    return createNoStoreRedirect("/?status=account_deleted", appUrl, true);
   }
 
-  return createNoStoreRedirect(nextPath, env.NEXT_PUBLIC_APP_URL);
+  return createNoStoreRedirect(nextPath, appUrl);
 }

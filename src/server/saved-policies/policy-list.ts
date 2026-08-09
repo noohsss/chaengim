@@ -49,6 +49,23 @@ export type SavedPolicyListParams = Readonly<{
   status?: string;
 }>;
 
+function compareSavedPoliciesByDeadline(
+  left: SavedPolicyListItem,
+  right: SavedPolicyListItem,
+): number {
+  const leftDeadline = left.policies?.application_end_date;
+  const rightDeadline = right.policies?.application_end_date;
+
+  if (leftDeadline && rightDeadline && leftDeadline !== rightDeadline) {
+    return leftDeadline.localeCompare(rightDeadline);
+  }
+
+  if (leftDeadline && !rightDeadline) return -1;
+  if (!leftDeadline && rightDeadline) return 1;
+
+  return right.updated_at.localeCompare(left.updated_at);
+}
+
 export async function listSavedPolicyIds(
   client: SupabaseClient,
 ): Promise<ReadonlySet<string>> {
@@ -72,8 +89,7 @@ export async function listSavedPolicies(
     .from("saved_policies")
     .select(
       "policy_id,status,priority,memo,outcome,result_date,result_memo,updated_at,policies(id,title,summary,support_content,application_end_date,application_period_text,is_rolling,application_url,category,organization_name,lifecycle_status)",
-    )
-    .order("updated_at", { ascending: false });
+    );
 
   const status = savedPolicyStatusSchema.safeParse(params.status);
   if (status.success) query = query.eq("status", status.data);
@@ -87,5 +103,5 @@ export async function listSavedPolicies(
   const parsed = z.array(savedPolicyRowSchema).safeParse(data);
   if (!parsed.success) throw new Error("챙긴 정책 데이터 형식이 올바르지 않습니다");
 
-  return parsed.data;
+  return [...parsed.data].sort(compareSavedPoliciesByDeadline);
 }

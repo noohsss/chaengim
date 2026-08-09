@@ -1,7 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import {
   ACCOUNT_DELETION_COOKIE_NAME,
@@ -18,7 +19,10 @@ import { createClient } from "@/lib/supabase/server";
 export async function signInWithGoogle(formData: FormData): Promise<never> {
   const env = getPublicEnv();
   const nextPath = getSafeNextPath(formData.get("next"));
-  const callbackUrl = new URL("/auth/callback", env.NEXT_PUBLIC_APP_URL);
+  const requestHeaders = await headers();
+  const requestOrigin = z.url().safeParse(requestHeaders.get("origin"));
+  const appUrl = requestOrigin.success ? requestOrigin.data : env.NEXT_PUBLIC_APP_URL;
+  const callbackUrl = new URL("/auth/callback", appUrl);
   const cookieStore = await cookies();
   cookieStore.set({
     httpOnly: true,

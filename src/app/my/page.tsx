@@ -88,6 +88,7 @@ export default async function MyPage({ searchParams }: MyPageProps) {
           </label>
           <button className="ui-primary-action self-end" type="submit">적용</button>
         </form>
+        <p className="mt-3 text-sm text-muted-foreground">마감일이 빠른 순으로 정렬하고 있어요.</p>
 
         {params.status === "updated" ? <p className="mt-4 text-sm text-accent-foreground" role="status">변경 내용을 저장했어요.</p> : null}
         {params.status === "result_required" ? <p className="mt-4 text-sm text-destructive" role="alert">결과 기록을 저장하려면 신청 결과를 선택해 주세요.</p> : null}
