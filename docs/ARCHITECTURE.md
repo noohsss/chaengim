@@ -171,6 +171,8 @@ flowchart LR
 - Tailwind CSS와 shadcn/ui는 `src/app/globals.css`의 `background`, `foreground`, `primary`, `accent`, `muted`, `border`, `destructive`, `ring` 의미 토큰을 공통으로 사용한다.
 - 기본 서체는 npm 패키지로 자체 번들링한 Pretendard Variable이며 외부 폰트 CDN에 의존하지 않는다.
 - 브랜드 로고는 `BrandLogo`의 `default | compact`, `brand | monochrome` 공개 변형을 사용하고, 제품 아이콘은 2px 라운드 스트로크의 Lucide 아이콘을 기본으로 한다.
+- 홈과 내 챙김의 정책 요약은 `PolicySummaryCard`를 공유한다. 상단은 카테고리·정책명·한국 시간 기준 마감 상태와 북마크 액션, 하단은 분야·지원 내용·정확한 마감일을 표시하며 MVP의 고정 대상 정보는 반복하지 않는다.
+- 내 챙김의 상태·우선순위·메모·결과 수정 폼은 정책 카드의 접힌 `details` 영역에서 필요할 때 펼친다.
 - `/design-system`은 인증·DB·API 호출이 없는 정적 Server Component이며 내비게이션에서 숨기고 `noindex`로 유지한다.
 - MVP는 라이트 모드만 지원한다. 다크 모드와 전체 공용 컴포넌트 세트는 실제 제품 화면 요구가 생길 때 확장한다.
 
@@ -299,7 +301,7 @@ flowchart LR
 
 연동 규칙:
 
-- 두 출처는 독립적으로 호출해 한쪽 실패가 다른 쪽 결과를 막지 않게 한다.
+- 온통청년의 모든 페이지 수집이 성공한 뒤에만 정책별 정규화와 upsert를 시작하며, 페이지 요청이 실패하면 기존 정책 데이터를 유지한다.
 - 목록·상세·지원조건처럼 분리된 응답은 어댑터 내부에서 결합한다.
 - 외부 필드명과 코드 체계는 어댑터 밖으로 노출하지 않는다.
 - 외부 ID가 같은 정책은 갱신하고 다른 ID는 별도 정책으로 유지한다.

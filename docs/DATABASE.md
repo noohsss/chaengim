@@ -1,8 +1,8 @@
 # 챙김 Supabase PostgreSQL 데이터 모델
 
-> 최종 갱신: 2026-08-08
+> 최종 갱신: 2026-08-09
 > 기준 문서: [`ARCHITECTURE.md`](./ARCHITECTURE.md)
-> 상태: 설계 확정 / 마이그레이션 작성 및 원격 DB 적용 완료
+> 상태: 설계 확정 / 기본 스키마 원격 적용 완료 / 단일 출처 정리 마이그레이션 원격 적용 미확인
 
 챙김 MVP는 Supabase가 관리하는 `auth.users` 외에 애플리케이션 테이블을 5개만 사용한다. 현재 사용자 기능에 직접 필요하지 않은 운영·감사·미래 확장용 테이블은 만들지 않는다.
 
@@ -350,5 +350,8 @@ policy_changed:{policyId}:{versionHash}
 2. `20260807151300_harden_mvp_schema.sql`
    - Auth 트리거 함수의 클라이언트 실행 권한 제거
    - 정책 조회 RLS의 중복 permissive 정책 통합
+3. `20260809100000_remove_gov24_source.sql`
+   - 정부24 외부 ID 인덱스와 출처 제약 제거
+   - `policies.sources`와 `source_refs`를 온통청년 단일 출처로 제한
 
-적용 후 5개 테이블의 RLS 활성화와 역할별 컬럼 권한을 확인했다. Security Advisor 경고는 없으며, Performance Advisor의 미사용 인덱스 알림은 데이터와 실제 쿼리가 없는 초기 상태에서 발생한 정보성 결과다.
+첫 두 마이그레이션 적용 후 5개 테이블의 RLS 활성화와 역할별 컬럼 권한을 확인했다. Security Advisor 경고는 없으며, Performance Advisor의 미사용 인덱스 알림은 데이터와 실제 쿼리가 없는 초기 상태에서 발생한 정보성 결과다. 세 번째 마이그레이션의 원격 적용 여부와 기존 정부24 출처 데이터 잔존 여부는 아직 확인하지 않았다.
