@@ -2,12 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { z } from "zod";
 
 import {
   createProfileUpdateSchema,
   getCurrentSeoulYear,
 } from "@/features/profile/profile-schema";
+import {
+  ACCOUNT_DELETION_COOKIE_MAX_AGE_SECONDS,
+  ACCOUNT_DELETION_COOKIE_NAME,
+  AUTH_NEXT_COOKIE_PATH,
+} from "@/lib/auth/safe-next-path";
+import { getPublicEnv } from "@/lib/env/public";
 import { createClient } from "@/lib/supabase/server";
 
 const userIdSchema = z.uuid();
@@ -93,4 +100,29 @@ export async function signOut(): Promise<never> {
   }
 
   redirect("/");
+}
+
+export async function beginAccountDeletion(): Promise<never> {
+  const supabase = await createClient();
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims();
+  const userId = userIdSchema.safeParse(claimsData?.claims.sub);
+
+  if (claimsError || !userId.success) {
+    redirect("/login?next=%2Fsettings");
+  }
+
+  const env = getPublicEnv();
+  const cookieStore = await cookies();
+  cookieStore.set({
+    httpOnly: true,
+    maxAge: ACCOUNT_DELETION_COOKIE_MAX_AGE_SECONDS,
+    name: ACCOUNT_DELETION_COOKIE_NAME,
+    path: AUTH_NEXT_COOKIE_PATH,
+    sameSite: "lax",
+    secure: new URL(env.NEXT_PUBLIC_APP_URL).protocol === "https:",
+    value: userId.data,
+  });
+
+  redirect("/login?next=%2F&mode=delete");
 }

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
+  ACCOUNT_DELETION_COOKIE_NAME,
   AUTH_NEXT_COOKIE_MAX_AGE_SECONDS,
   AUTH_NEXT_COOKIE_NAME,
   AUTH_NEXT_COOKIE_PATH,
@@ -29,9 +30,15 @@ export async function signInWithGoogle(formData: FormData): Promise<never> {
     value: encodeAuthNextPathCookie(nextPath),
   });
   const supabase = await createClient();
+  const isAccountDeletionReauthentication = Boolean(
+    cookieStore.get(ACCOUNT_DELETION_COOKIE_NAME)?.value,
+  );
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
+      ...(isAccountDeletionReauthentication
+        ? { queryParams: { prompt: "login" } }
+        : {}),
       redirectTo: callbackUrl.toString(),
     },
   });

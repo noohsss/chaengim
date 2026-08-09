@@ -15,10 +15,17 @@ type LoginPageProps = Readonly<{
 }>;
 
 const ERROR_MESSAGES: Readonly<Record<string, string>> = {
+  account_delete_identity_mismatch:
+    "처음 로그인한 Google 계정으로 다시 인증해 주세요.",
+  account_delete_failed:
+    "회원 탈퇴를 완료하지 못했어요. 잠시 후 다시 시도해 주세요.",
   oauth_callback_failed:
     "로그인을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.",
   oauth_start_failed: "Google 로그인을 시작하지 못했어요. 다시 시도해 주세요.",
 };
+
+const ACCOUNT_DELETION_MESSAGE =
+  "회원 탈퇴를 계속하려면 같은 Google 계정으로 다시 인증해 주세요.";
 
 function getErrorMessage(
   error: string | string[] | undefined,
@@ -36,6 +43,7 @@ export default async function LoginPage({
   const params = await searchParams;
   const errorMessage = getErrorMessage(params.error);
   const nextPath = getSafeNextPath(params.next);
+  const isAccountDeletion = params.mode === "delete";
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-12">
@@ -62,6 +70,15 @@ export default async function LoginPage({
             role="alert"
           >
             {errorMessage}
+          </p>
+        ) : null}
+
+        {isAccountDeletion ? (
+          <p
+            className="mt-6 rounded-lg bg-[color-mix(in_srgb,var(--destructive)_8%,white)] px-4 py-3 text-sm text-destructive"
+            role="status"
+          >
+            {ACCOUNT_DELETION_MESSAGE}
           </p>
         ) : null}
 

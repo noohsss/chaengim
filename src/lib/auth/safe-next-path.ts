@@ -8,6 +8,8 @@ const ENCODED_PATH_SEPARATOR_PATTERN = /%(?:2f|5c)/i;
 export const AUTH_NEXT_COOKIE_NAME = "chaengim_auth_next";
 export const AUTH_NEXT_COOKIE_PATH = "/auth/callback";
 export const AUTH_NEXT_COOKIE_MAX_AGE_SECONDS = 10 * 60;
+export const ACCOUNT_DELETION_COOKIE_NAME = "chaengim_account_deletion";
+export const ACCOUNT_DELETION_COOKIE_MAX_AGE_SECONDS = 10 * 60;
 
 const ALLOWED_PATH_PREFIXES = [
   "/policies",

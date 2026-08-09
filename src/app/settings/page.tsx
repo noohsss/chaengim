@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { DeleteAccountForm } from "@/components/settings/delete-account-form";
 import {
   EMPLOYMENT_STATUS_OPTIONS,
   getCurrentSeoulYear,
@@ -219,6 +220,17 @@ export default async function SettingsPage({
             </button>
           </div>
         </form>
+
+        <section className="mt-10 rounded-xl border border-destructive/30 bg-[color-mix(in_srgb,var(--destructive)_3%,white)] p-6">
+          <h2 className="font-medium text-destructive">계정 삭제</h2>
+          <p className="mt-2 text-sm leading-5 text-muted-foreground">
+            회원 탈퇴 시 챙긴 정책, 메모, 신청 결과와 모든 알림 기록이 영구적으로
+            삭제돼요.
+          </p>
+          <div className="mt-5 flex justify-end">
+            <DeleteAccountForm />
+          </div>
+        </section>
       </div>
     </main>
   );

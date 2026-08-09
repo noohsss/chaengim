@@ -94,7 +94,11 @@ function formatDeadline(policy: {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const filters = toSearchParams(await searchParams);
+  const params = await searchParams;
+  const filters = toSearchParams(params);
+  const isAccountDeleted = z
+    .enum(["account_deleted"])
+    .safeParse(params.status).success;
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const isAuthenticated = z.uuid().safeParse(claimsData?.claims.sub).success;
@@ -132,6 +136,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               )}
             </div>
           </nav>
+
+          {isAccountDeleted ? (
+            <p
+              className="mt-5 rounded-lg bg-accent px-4 py-3 text-sm text-accent-foreground"
+              role="status"
+            >
+              회원 탈퇴가 완료됐어요.
+            </p>
+          ) : null}
 
           <div className="grid items-center gap-14 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20 lg:pt-24">
             <div>
