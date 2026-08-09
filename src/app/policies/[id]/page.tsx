@@ -1,4 +1,10 @@
-import { CalendarDays, ExternalLink, MapPin } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  CalendarDays,
+  ExternalLink,
+  MapPin,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -92,11 +98,30 @@ export default async function PolicyDetailPage({
       <div className="mx-auto max-w-4xl px-6 py-8 sm:py-12">
         <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_16px_50px_rgba(37,42,51,0.07)]">
           <header className="border-b border-border px-6 py-8 sm:px-10 sm:py-10">
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="rounded-full bg-secondary px-3 py-1 font-semibold text-secondary-foreground">
-                {categoryLabels[policy.category]}
-              </span>
-              <span className="text-muted-foreground">온통청년</span>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="rounded-full bg-secondary px-3 py-1 font-semibold text-secondary-foreground">
+                  {categoryLabels[policy.category]}
+                </span>
+                <span className="text-muted-foreground">온통청년</span>
+              </div>
+              <form action={updateSavedPolicy} className="shrink-0">
+                <input name="intent" type="hidden" value={isSaved ? "remove" : "save"} />
+                <input name="policyId" type="hidden" value={policy.id} />
+                <button
+                  aria-label={isSaved ? "챙기기 취소" : "챙기기"}
+                  aria-pressed={isSaved}
+                  className="group flex min-h-16 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs font-semibold text-primary transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  type="submit"
+                >
+                  {isSaved ? (
+                    <BookmarkCheck aria-hidden="true" fill="currentColor" size={25} />
+                  ) : (
+                    <Bookmark aria-hidden="true" size={25} />
+                  )}
+                  <span>{isSaved ? "챙기기 취소" : "챙기기"}</span>
+                </button>
+              </form>
             </div>
             <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
               {policy.title}
@@ -116,16 +141,6 @@ export default async function PolicyDetailPage({
                 {formatRegions(policy.region_codes)}
               </span>
             </div>
-            <form action={updateSavedPolicy} className="mt-7">
-              <input name="intent" type="hidden" value={isSaved ? "remove" : "save"} />
-              <input name="policyId" type="hidden" value={policy.id} />
-              <button
-                className="min-h-11 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
-                type="submit"
-              >
-                {isSaved ? "챙겼어요 · 취소하기" : "이 정책 챙기기"}
-              </button>
-            </form>
             {status && statusMessages[status] ? (
               <p className="mt-3 text-sm text-accent-foreground" role="status">
                 {statusMessages[status]}
