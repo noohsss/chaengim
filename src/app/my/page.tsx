@@ -57,7 +57,12 @@ export default async function MyPage({ searchParams }: MyPageProps) {
                 신청할 정책의 진행 상황과 우선순위를 한곳에서 관리할 수 있어요.
               </p>
             </div>
-            <span className="text-sm text-muted-foreground">{visiblePolicies.length}개</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm text-muted-foreground">{visiblePolicies.length}개</span>
+              <Link className="ui-secondary-action" href="/my/analysis">
+                내 챙김 분석
+              </Link>
+            </div>
           </div>
         </header>
 
