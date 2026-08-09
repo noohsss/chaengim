@@ -279,7 +279,7 @@ src/server/policies/
 
 src/app/api/cron/
 ├── policies/route.ts
-└── reminders/route.ts
+└── notifications/route.ts
 ```
 
 동기화 흐름:
@@ -287,12 +287,14 @@ src/app/api/cron/
 ```mermaid
 flowchart LR
     C["Vercel Cron"] --> H["보호된 정책 동기화 Route Handler"]
+    C --> R["보호된 알림 생성 Route Handler"]
     H --> Y["온통청년 Adapter"]
     Y --> N["공통 타입 정규화"]
     N --> D["중복 후보 통합"]
     D --> V["버전 해시 계산"]
     V --> P["policies upsert"]
     P --> X["주요 변경 알림 생성"]
+    R --> Z["마감 알림 생성"]
 ```
 
 연동 규칙:
