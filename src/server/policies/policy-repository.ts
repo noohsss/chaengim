@@ -4,8 +4,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { normalizedPolicySchema, type NormalizedPolicy } from "./normalized-policy";
 import { normalizedPolicyToRow, type PolicyRow } from "./policy-row";
+import type { PolicyLifecycleStatus } from "./policy-lifecycle";
 
 type PolicyLookupRow = { id: string };
+type UpsertPolicyOptions = Readonly<{
+  lifecycleStatus?: PolicyLifecycleStatus;
+}>;
 
 export class PolicyRepositoryError extends Error {
   constructor(message: string) {
@@ -56,9 +60,10 @@ async function findExistingPolicyId(
 export async function upsertNormalizedPolicy(
   client: SupabaseClient,
   input: NormalizedPolicy,
+  options: UpsertPolicyOptions = {},
 ): Promise<{ id: string; row: PolicyRow }> {
   const policy = normalizedPolicySchema.parse(input);
-  const row = normalizedPolicyToRow(policy);
+  const row = normalizedPolicyToRow(policy, options.lifecycleStatus);
   const existingId = await findExistingPolicyId(client, policy);
 
   if (existingId) {

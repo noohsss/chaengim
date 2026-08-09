@@ -11,6 +11,7 @@ import {
   youthCenterPolicySchema,
 } from "./adapters";
 import { upsertNormalizedPolicy } from "./policy-repository";
+import { getPolicyLifecycleStatus } from "./policy-lifecycle";
 
 const unknownArraySchema = z.array(z.unknown());
 const recordSchema = z.record(z.string(), z.unknown());
@@ -109,7 +110,10 @@ async function syncYouthCenter(
         continue;
       }
       try {
-        await upsertNormalizedPolicy(client, normalizeYouthCenterPolicy(parsed.data));
+        const policy = normalizeYouthCenterPolicy(parsed.data);
+        await upsertNormalizedPolicy(client, policy, {
+          lifecycleStatus: getPolicyLifecycleStatus(policy),
+        });
         upserted += 1;
       } catch (error) {
         logFailedItem("youth_center", parsed.data.plcyNo, error);

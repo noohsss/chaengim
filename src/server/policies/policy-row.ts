@@ -2,6 +2,10 @@ import {
   normalizedPolicySchema,
   type NormalizedPolicy,
 } from "./normalized-policy";
+import {
+  policyLifecycleStatusSchema,
+  type PolicyLifecycleStatus,
+} from "./policy-lifecycle";
 import { z } from "zod";
 
 export const policyRowSchema = normalizedPolicySchema.transform((policy) => ({
@@ -21,12 +25,16 @@ export const policyRowSchema = normalizedPolicySchema.transform((policy) => ({
   region_codes: policy.regionCodes,
   sources: policy.sources,
   source_refs: policy.sourceRefs,
-  lifecycle_status: "active" as const,
+  lifecycle_status: policyLifecycleStatusSchema.parse("active"),
   version_hash: policy.versionHash,
 }));
 
 export type PolicyRow = z.infer<typeof policyRowSchema>;
 
-export function normalizedPolicyToRow(policy: NormalizedPolicy): PolicyRow {
-  return policyRowSchema.parse(policy);
+export function normalizedPolicyToRow(
+  policy: NormalizedPolicy,
+  lifecycleStatus: PolicyLifecycleStatus = "active",
+): PolicyRow {
+  const row = policyRowSchema.parse(policy);
+  return { ...row, lifecycle_status: lifecycleStatus };
 }

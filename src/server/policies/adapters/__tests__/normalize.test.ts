@@ -8,6 +8,7 @@ import {
   normalizeYouthCenterPolicy,
   normalizedPolicyToRow,
 } from "../index";
+import { getPolicyLifecycleStatus } from "../../policy-lifecycle";
 
 const fixturesDir = join(
   process.cwd(),
@@ -82,6 +83,27 @@ test("maps a normalized policy to the policies table shape", async () => {
   assert.equal(row.lifecycle_status, "active");
   assert.deepEqual(row.sources, ["youth_center"]);
   assert.deepEqual(row.source_refs.youth_center?.externalId, "YC-2026-0001");
+});
+
+test("archives a policy whose application deadline has passed", async () => {
+  const sourcePolicy = await readFixture("youth-center-policy.json");
+  const policy = normalizeYouthCenterPolicy(sourcePolicy);
+  const row = normalizedPolicyToRow(
+    policy,
+    getPolicyLifecycleStatus(policy, "2026-06-01"),
+  );
+
+  assert.equal(row.lifecycle_status, "archived");
+});
+
+test("keeps a policy active through its application deadline", async () => {
+  const sourcePolicy = await readFixture("youth-center-policy.json");
+  const policy = normalizeYouthCenterPolicy(sourcePolicy);
+
+  assert.equal(
+    getPolicyLifecycleStatus(policy, "2026-05-31"),
+    "active",
+  );
 });
 
 async function readFixture(fileName: string): Promise<unknown> {

@@ -51,6 +51,7 @@ const categoryValues = new Set([
   "participation_rights",
   "other",
 ]);
+const regionCodePattern = /^\d{2}$/;
 
 function escapeIlike(value: string): string {
   return value.replace(/[\\%_]/g, "\\$&");
@@ -87,7 +88,13 @@ export async function listPublicPolicies(
 
   if (search) query = query.ilike("title", `%${escapeIlike(search)}%`);
   if (category && categoryValues.has(category)) query = query.eq("category", category);
-  if (region) query = query.contains("region_codes", [region]);
+  if (region) {
+    if (regionCodePattern.test(region)) {
+      query = query.or(`region_codes.cs.{${region}},region_codes.cs.{00}`);
+    } else {
+      query = query.contains("region_codes", [region]);
+    }
+  }
 
   const { data, count, error } = await query;
   if (error) throw new Error(`정책 목록을 불러오지 못했습니다: ${error.message}`);
