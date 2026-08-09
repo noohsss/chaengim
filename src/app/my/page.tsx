@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, ExternalLink, Flag } from "lucide-react";
+import { CalendarDays, ExternalLink, Flag } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -67,13 +67,6 @@ export default async function MyPage({ searchParams }: MyPageProps) {
         <header>
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />
-          </Link>
-          <Link
-            className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            href="/#policies"
-          >
-            <ArrowLeft aria-hidden="true" size={17} />
-            정책 둘러보기
           </Link>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
