@@ -41,7 +41,7 @@ export function AccountMenu() {
       <button
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        className="flex min-h-11 items-center gap-1 rounded-[var(--radius-control)] bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+        className="ui-primary-action px-4"
         onClick={() => setIsOpen((open) => !open)}
         type="button"
       >
@@ -56,7 +56,7 @@ export function AccountMenu() {
       {isOpen ? (
         <div
           aria-label="내 메뉴"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-44 rounded-xl border border-border bg-card p-1.5 shadow-[0_12px_36px_rgba(37,42,51,0.14)]"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-44 rounded-[var(--radius)] border border-border bg-card p-1.5 shadow-[0_12px_36px_rgba(37,42,51,0.12)]"
           role="menu"
         >
           <Link

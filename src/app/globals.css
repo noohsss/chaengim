@@ -104,6 +104,103 @@ textarea {
   outline-offset: 3px;
 }
 
+/* Shared Soft Horizon product surfaces */
+.ui-page {
+  min-height: 100vh;
+  background: var(--brand-off-white);
+}
+
+.ui-shell {
+  width: min(100% - 3rem, 72rem);
+  margin: 0 auto;
+}
+
+.ui-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 0.75rem 2.5rem rgb(37 42 51 / 7%);
+}
+
+.ui-control {
+  min-height: 2.75rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.ui-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--secondary) 85%, transparent);
+}
+
+.ui-primary-action,
+.ui-secondary-action {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-control);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.ui-primary-action {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ui-primary-action:hover {
+  background: var(--primary-hover);
+}
+
+.ui-primary-action:active {
+  background: var(--primary-pressed);
+}
+
+.ui-secondary-action {
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.ui-secondary-action:hover {
+  background: var(--secondary);
+}
+
+.ui-eyebrow {
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.ui-status-success {
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.ui-status-error {
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--destructive) 8%, white);
+  color: var(--destructive);
+}
+
+@media (max-width: 639px) {
+  .ui-shell {
+    width: min(100% - 2rem, 72rem);
+  }
+}
+
 ::selection {
   background: var(--brand-sky);
   color: var(--foreground);

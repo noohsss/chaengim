@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   APPLICATION_OUTCOME_OPTIONS,
   SAVED_POLICY_PRIORITY_OPTIONS,
@@ -61,11 +62,14 @@ export default async function MyPage({ searchParams }: MyPageProps) {
   const visiblePolicies = savedPolicies.filter((item) => item.policies !== null);
 
   return (
-    <main className="min-h-screen bg-[var(--brand-off-white)] px-6 py-8 sm:py-12">
-      <div className="mx-auto max-w-5xl">
+    <main className="ui-page px-6 py-8 sm:py-12">
+      <div className="ui-shell max-w-5xl">
         <header>
+          <Link aria-label="챙김 홈" href="/">
+            <BrandLogo size="compact" />
+          </Link>
           <Link
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             href="/#policies"
           >
             <ArrowLeft aria-hidden="true" size={17} />
@@ -73,7 +77,7 @@ export default async function MyPage({ searchParams }: MyPageProps) {
           </Link>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-primary">내 챙김</p>
+              <p className="ui-eyebrow">내 챙김</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">챙긴 정책을 정리해 보세요</h1>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 신청할 정책의 진행 상황과 우선순위를 한곳에서 관리할 수 있어요.
@@ -83,22 +87,22 @@ export default async function MyPage({ searchParams }: MyPageProps) {
           </div>
         </header>
 
-        <form className="mt-8 grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-[1fr_1fr_auto]" method="get">
+        <form className="ui-card mt-8 grid gap-3 p-4 sm:grid-cols-[1fr_1fr_auto]" method="get">
           <label className="grid gap-2 text-sm font-medium">
             진행 상태
-            <select className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={status ?? ""} name="status">
+            <select className="ui-control" defaultValue={status ?? ""} name="status">
               <option value="">전체 상태</option>
               {SAVED_POLICY_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
           <label className="grid gap-2 text-sm font-medium">
             우선순위
-            <select className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={priority ?? ""} name="priority">
+            <select className="ui-control" defaultValue={priority ?? ""} name="priority">
               <option value="">전체 우선순위</option>
               {SAVED_POLICY_PRIORITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
-          <button className="min-h-11 self-end rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground" type="submit">적용</button>
+          <button className="ui-primary-action self-end" type="submit">적용</button>
         </form>
 
         {params.status === "updated" ? <p className="mt-4 text-sm text-accent-foreground" role="status">변경 내용을 저장했어요.</p> : null}
@@ -106,10 +110,10 @@ export default async function MyPage({ searchParams }: MyPageProps) {
         {params.status === "update_failed" ? <p className="mt-4 text-sm text-destructive" role="alert">변경 내용을 저장하지 못했어요. 다시 시도해 주세요.</p> : null}
 
         {visiblePolicies.length === 0 ? (
-          <section className="mt-8 rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
+          <section className="ui-card mt-8 border-dashed px-6 py-16 text-center shadow-none">
             <h2 className="font-semibold">아직 챙긴 정책이 없어요</h2>
             <p className="mt-2 text-sm text-muted-foreground">관심 있는 정책을 챙기면 여기에서 진행 상황을 관리할 수 있어요.</p>
-            <Link className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground" href="/#policies">정책 찾아보기</Link>
+            <Link className="ui-primary-action mt-6" href="/#policies">정책 찾아보기</Link>
           </section>
         ) : (
           <ul className="mt-8 grid gap-5 lg:grid-cols-2">
@@ -118,7 +122,7 @@ export default async function MyPage({ searchParams }: MyPageProps) {
               if (!policy) return null;
 
               return (
-                <li className="rounded-2xl border border-border bg-card p-5 shadow-sm" key={item.policy_id}>
+                <li className="ui-card p-5" key={item.policy_id}>
                   <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                     <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">{categoryLabels[policy.category]}</span>
                     <span className="inline-flex items-center gap-1"><CalendarDays aria-hidden="true" size={14} />{formatDeadline(policy)}</span>

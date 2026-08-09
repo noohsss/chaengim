@@ -46,10 +46,10 @@ export default async function LoginPage({
   const isAccountDeletion = params.mode === "delete";
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
+    <main className="ui-page flex items-center justify-center px-6 py-12">
       <section
         aria-labelledby="login-title"
-        className="w-full max-w-md rounded-xl border bg-card p-6 shadow-[0_16px_48px_rgba(37,42,51,0.08)] sm:p-8"
+        className="ui-card w-full max-w-md p-6 sm:p-8"
       >
         <BrandLogo priority />
         <div className="mt-8">
@@ -66,7 +66,7 @@ export default async function LoginPage({
 
         {errorMessage ? (
           <p
-            className="mt-6 rounded-lg bg-[color-mix(in_srgb,var(--destructive)_8%,white)] px-4 py-3 text-sm text-destructive"
+            className="ui-status-error mt-6 px-4 py-3 text-sm"
             role="alert"
           >
             {errorMessage}
@@ -75,7 +75,7 @@ export default async function LoginPage({
 
         {isAccountDeletion ? (
           <p
-            className="mt-6 rounded-lg bg-[color-mix(in_srgb,var(--destructive)_8%,white)] px-4 py-3 text-sm text-destructive"
+            className="ui-status-error mt-6 px-4 py-3 text-sm"
             role="status"
           >
             {ACCOUNT_DELETION_MESSAGE}

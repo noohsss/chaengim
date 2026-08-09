@@ -95,8 +95,8 @@ export default async function SettingsPage({
   );
 
   return (
-    <main className="min-h-screen px-6 py-8 sm:py-12">
-      <div className="mx-auto max-w-2xl">
+    <main className="ui-page px-6 py-8 sm:py-12">
+      <div className="ui-shell max-w-2xl">
         <header className="flex items-center justify-between gap-4">
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />
@@ -104,7 +104,8 @@ export default async function SettingsPage({
         </header>
 
         <div className="mt-10">
-          <h1 className="text-[1.375rem] font-medium leading-7 tracking-[-0.025em]">
+          <p className="ui-eyebrow">내 정보</p>
+          <h1 className="mt-2 text-3xl font-semibold leading-9 tracking-[-0.04em]">
             내 정보
           </h1>
           <p className="mt-2 text-sm leading-5 text-muted-foreground">
@@ -116,8 +117,8 @@ export default async function SettingsPage({
           <p
             className={
               statusMessage.tone === "success"
-                ? "mt-6 rounded-lg bg-accent px-4 py-3 text-sm text-accent-foreground"
-                : "mt-6 rounded-lg bg-[color-mix(in_srgb,var(--destructive)_8%,white)] px-4 py-3 text-sm text-destructive"
+                ? "ui-status-success mt-6 px-4 py-3 text-sm"
+                : "ui-status-error mt-6 px-4 py-3 text-sm"
             }
             role={statusMessage.tone === "success" ? "status" : "alert"}
           >
@@ -126,13 +127,13 @@ export default async function SettingsPage({
         ) : null}
 
         <form action={updateProfile} className="mt-6 space-y-6">
-          <section className="rounded-xl border bg-card p-6 shadow-[0_12px_36px_rgba(37,42,51,0.06)]">
-            <h2 className="font-medium">기본 프로필</h2>
+          <section className="ui-card p-6">
+            <h2 className="text-lg font-medium">기본 프로필</h2>
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
               <label className="grid gap-2 text-sm font-medium">
                 출생연도
                 <select
-                  className="min-h-11 rounded-[var(--radius-control)] border bg-white px-3 text-base font-normal sm:text-sm"
+                  className="ui-control text-base font-normal sm:text-sm"
                   defaultValue={profile.birth_year ?? ""}
                   name="birthYear"
                 >
@@ -148,7 +149,7 @@ export default async function SettingsPage({
               <label className="grid gap-2 text-sm font-medium">
                 거주 시도
                 <select
-                  className="min-h-11 rounded-[var(--radius-control)] border bg-white px-3 text-base font-normal sm:text-sm"
+                  className="ui-control text-base font-normal sm:text-sm"
                   defaultValue={profile.region_code ?? ""}
                   name="regionCode"
                 >
@@ -164,7 +165,7 @@ export default async function SettingsPage({
               <label className="grid gap-2 text-sm font-medium sm:col-span-2">
                 현재 상태
                 <select
-                  className="min-h-11 rounded-[var(--radius-control)] border bg-white px-3 text-base font-normal sm:text-sm"
+                  className="ui-control text-base font-normal sm:text-sm"
                   defaultValue={profile.employment_status ?? ""}
                   name="employmentStatus"
                 >
@@ -179,8 +180,8 @@ export default async function SettingsPage({
             </div>
           </section>
 
-          <section className="rounded-xl border bg-card p-6 shadow-[0_12px_36px_rgba(37,42,51,0.06)]">
-            <h2 className="font-medium">이메일 알림</h2>
+          <section className="ui-card p-6">
+            <h2 className="text-lg font-medium">이메일 알림</h2>
             <p className="mt-2 break-all text-sm text-muted-foreground">
               {profile.notification_email ?? "연결된 이메일이 없어요."}
             </p>
@@ -204,16 +205,13 @@ export default async function SettingsPage({
           </section>
 
           <div className="flex justify-end">
-            <button
-              className="min-h-11 rounded-[var(--radius-control)] bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
-              type="submit"
-            >
+            <button className="ui-primary-action" type="submit">
               저장하기
             </button>
           </div>
         </form>
 
-        <section className="mt-10 rounded-xl border border-destructive/30 bg-[color-mix(in_srgb,var(--destructive)_3%,white)] p-6">
+        <section className="mt-10 rounded-[var(--radius)] border border-destructive/30 bg-[color-mix(in_srgb,var(--destructive)_3%,white)] p-6">
           <h2 className="font-medium text-destructive">계정 삭제</h2>
           <p className="mt-2 text-sm leading-5 text-muted-foreground">
             회원 탈퇴 시 챙긴 정책, 메모, 신청 결과와 모든 알림 기록이 영구적으로

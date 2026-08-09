@@ -94,9 +94,9 @@ export default async function PolicyDetailPage({
   const sourceUrl = policy.source_refs.youth_center?.url;
 
   return (
-    <main className="min-h-screen bg-[var(--brand-off-white)]">
+    <main className="ui-page">
       <div className="mx-auto max-w-4xl px-6 py-8 sm:py-12">
-        <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_16px_50px_rgba(37,42,51,0.07)]">
+        <article className="ui-card overflow-hidden">
           <header className="border-b border-border px-6 py-8 sm:px-10 sm:py-10">
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2 text-sm">

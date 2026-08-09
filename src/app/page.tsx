@@ -8,7 +8,6 @@ import {
 } from "@/server/policies/policy-query";
 import {
   ArrowDown,
-  BellRing,
   BookmarkCheck,
   CalendarDays,
   Check,
@@ -17,6 +16,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { z } from "zod";
 
@@ -106,12 +106,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const { policies } = policyPage;
 
   return (
-    <main className="min-h-screen overflow-hidden">
-      <section className="relative bg-[linear-gradient(150deg,var(--brand-sky)_0%,#fff_52%,var(--brand-mint)_100%)]">
-        <div
-          aria-hidden="true"
-          className="absolute -right-24 top-20 size-72 rounded-full bg-white/60 blur-3xl"
-        />
+    <main className="ui-page overflow-hidden">
+      <section className="relative bg-[var(--brand-sky)]">
         <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-6 sm:pb-28 sm:pt-8">
           <nav className="flex items-center justify-between" aria-label="주요 메뉴">
             <Link aria-label="챙김 홈" href="/">
@@ -119,7 +115,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </Link>
             <div className="flex items-center gap-1 sm:gap-3">
               <a
-                className="hidden min-h-11 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/70 hover:text-foreground sm:flex"
+                className="hidden min-h-11 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/60 hover:text-foreground sm:flex"
                 href="#how-it-works"
               >
                 이용 방법
@@ -128,7 +124,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <AccountMenu />
               ) : (
                 <Link
-                  className="flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+                  className="ui-primary-action"
                   href="/login"
                 >
                   로그인
@@ -139,7 +135,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
           {isAccountDeleted ? (
             <p
-              className="mt-5 rounded-lg bg-accent px-4 py-3 text-sm text-accent-foreground"
+              className="ui-status-success mt-5 px-4 py-3 text-sm"
               role="status"
             >
               회원 탈퇴가 완료됐어요.
@@ -163,14 +159,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-primary px-6 text-base font-semibold text-primary-foreground shadow-[0_10px_30px_rgba(37,99,216,0.22)] transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+                  className="ui-primary-action min-h-12 px-6 text-base"
                   href="#policies"
                 >
                   정책 둘러보기
                   <ArrowDown aria-hidden="true" size={18} />
                 </a>
                 <a
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] border border-white bg-white/80 px-6 text-base font-semibold text-foreground shadow-sm transition-colors hover:bg-white"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] border border-primary bg-white/80 px-6 text-base font-semibold text-primary transition-colors hover:bg-white"
                   href="#how-it-works"
                 >
                   챙김 알아보기
@@ -182,52 +178,20 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </p>
             </div>
 
-            <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:ml-auto">
-              <div
-                aria-hidden="true"
-                className="absolute -inset-6 rounded-[2.5rem] bg-white/35 blur-2xl"
-              />
-              <div className="relative rotate-[1.5deg] rounded-[2rem] border border-white/80 bg-white/90 p-5 shadow-[0_28px_80px_rgba(68,93,130,0.18)] backdrop-blur sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-primary">내 챙김</p>
-                    <p className="mt-1 text-lg font-semibold">이번 주 확인할 일</p>
-                  </div>
-                  <span className="flex size-10 items-center justify-center rounded-full bg-secondary text-primary">
-                    <BellRing aria-hidden="true" size={20} />
-                  </span>
-                </div>
-                <div className="mt-5 space-y-3">
-                  <article className="rounded-xl border bg-card p-4 shadow-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-[color-mix(in_srgb,var(--destructive)_9%,white)] px-2.5 py-1 text-xs font-semibold text-destructive">
-                        마감 임박
-                      </span>
-                      <span className="text-xs text-muted-foreground">3일 남음</span>
-                    </div>
-                    <h2 className="mt-3 font-semibold">청년 주거비 지원</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      신청 서류와 소득 조건을 확인해 보세요.
-                    </p>
-                  </article>
-                  <article className="rounded-xl border bg-card p-4 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                        <Check aria-hidden="true" size={18} strokeWidth={2.5} />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold">취업 준비 지원금</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          신청 예정으로 정리했어요
-                        </p>
-                      </div>
-                    </div>
-                  </article>
-                </div>
-                <div className="mt-4 flex items-center gap-2 rounded-xl bg-secondary/70 px-4 py-3 text-sm text-secondary-foreground">
-                  <Sparkles aria-hidden="true" className="shrink-0" size={17} />
-                  다음에 확인할 조건을 차근차근 정리해 드려요.
-                </div>
+            <div className="relative mx-auto flex w-full max-w-md items-center justify-center lg:mx-0 lg:ml-auto">
+              <div className="flex size-64 items-center justify-center rounded-full bg-white/55 sm:size-80">
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="size-52 object-contain sm:size-64"
+                  height={320}
+                  priority
+                  src="/brand/brand-symbol-primary.png"
+                  width={320}
+                />
+              </div>
+              <div className="absolute bottom-0 right-0 hidden rounded-[var(--radius)] border border-white/80 bg-white/80 px-4 py-3 text-sm font-medium text-foreground shadow-sm backdrop-blur sm:block">
+                필요한 혜택을 놓치지 않도록
               </div>
             </div>
           </div>
@@ -257,7 +221,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             const Icon = item.icon;
             return (
               <li
-                className="relative rounded-2xl border bg-card p-6 shadow-[0_12px_36px_rgba(37,42,51,0.06)]"
+                className="relative rounded-[var(--radius)] border border-border bg-card p-6 shadow-[0_12px_36px_rgba(37,42,51,0.06)]"
                 key={item.label}
               >
                 <div className="flex items-center justify-between">
@@ -328,13 +292,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
           <form
             action="#policies"
-            className="mt-10 grid gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:grid-cols-[1fr_180px_140px_auto]"
+            className="mt-10 grid gap-3 rounded-[var(--radius)] border border-border bg-card p-4 shadow-[0_12px_40px_rgba(37,42,51,0.06)] sm:grid-cols-[1fr_180px_140px_auto]"
           >
             <label className="sr-only" htmlFor="search">
               정책 검색
             </label>
             <input
-              className="min-h-11 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
+              className="ui-control"
               defaultValue={filters.search}
               id="search"
               name="search"
@@ -344,7 +308,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               카테고리
             </label>
             <select
-              className="min-h-11 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
+              className="ui-control"
               defaultValue={filters.category ?? ""}
               id="category"
               name="category"
@@ -360,7 +324,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               지역
             </label>
             <select
-              className="min-h-11 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
+              className="ui-control"
               defaultValue={filters.region}
               id="region"
               name="region"
@@ -373,7 +337,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               ))}
             </select>
             <button
-              className="min-h-11 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+              className="ui-primary-action"
               type="submit"
             >
               검색
@@ -391,7 +355,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
 
           {policies.length === 0 ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
+            <div className="ui-card mt-6 border-dashed px-6 py-14 text-center shadow-none">
               <p className="font-medium">조건에 맞는 정책이 아직 없어요.</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 검색어와 필터를 바꾸면 다른 정책을 확인할 수 있어요.
@@ -401,7 +365,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <ul className="mt-6 grid gap-4 md:grid-cols-2">
               {policies.map((policy) => (
                 <li
-                  className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-md"
+                  className="ui-card p-5 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_1rem_3rem_rgba(37,42,51,0.1)]"
                   key={policy.id}
                 >
                   <Link
@@ -440,7 +404,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             >
               {policyPage.page > 1 ? (
                 <Link
-                  className="inline-flex min-h-10 items-center rounded-lg border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                  className="ui-secondary-action min-h-10 px-3 font-medium"
                   href={pageHref(filters, policyPage.page - 1)}
                 >
                   이전
@@ -451,7 +415,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </span>
               {policyPage.page < policyPage.totalPages ? (
                 <Link
-                  className="inline-flex min-h-10 items-center rounded-lg border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                  className="ui-secondary-action min-h-10 px-3 font-medium"
                   href={pageHref(filters, policyPage.page + 1)}
                 >
                   다음
