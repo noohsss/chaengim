@@ -1,8 +1,10 @@
 "use client";
 
-import { BookmarkCheck, ChevronDown, UserRound } from "lucide-react";
+import { BookmarkCheck, ChevronDown, LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+import { signOut } from "@/app/settings/actions";
 
 export function AccountMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,6 +77,17 @@ export function AccountMenu() {
             <UserRound aria-hidden="true" size={17} />
             내 정보
           </Link>
+          <div className="my-1 border-t border-border" />
+          <form action={signOut}>
+            <button
+              className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              role="menuitem"
+              type="submit"
+            >
+              <LogOut aria-hidden="true" size={17} />
+              로그아웃
+            </button>
+          </form>
         </div>
       ) : null}
     </div>

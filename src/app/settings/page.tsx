@@ -13,7 +13,7 @@ import {
 } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
 
-import { signOut, updateProfile } from "./actions";
+import { updateProfile } from "./actions";
 
 export const metadata: Metadata = {
   title: "설정 | 챙김",
@@ -108,14 +108,6 @@ export default async function SettingsPage({
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />
           </Link>
-          <form action={signOut}>
-            <button
-              className="min-h-11 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              type="submit"
-            >
-              로그아웃
-            </button>
-          </form>
         </header>
 
         <div className="mt-10">
