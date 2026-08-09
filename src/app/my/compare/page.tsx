@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { AiSubmitButton } from "@/components/ai/ai-submit-button";
 import { createClient } from "@/lib/supabase/server";
 import { ComparisonError, getComparison, getComparisonOptions } from "@/server/ai/comparison";
 
@@ -54,14 +55,14 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           <form action={requestComparison}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div><h2 className="text-xl font-semibold">비교할 정책 선택</h2><p className="mt-2 text-sm text-muted-foreground">정확히 2~3개를 선택할 수 있어요.</p></div>
-              <button className="ui-primary-action" type="submit">선택한 정책 비교하기</button>
+              <AiSubmitButton idleLabel="선택한 정책 비교하기" pendingLabel="AI 비교 중…" />
             </div>
             {options.length === 0 ? <p className="mt-8 rounded-[var(--radius-control)] border border-dashed p-6 text-center text-sm text-muted-foreground">아직 챙긴 정책이 없어요.</p> : <ul className="mt-6 grid gap-3 sm:grid-cols-2">{options.map((option) => <li key={option.id}><label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-[var(--radius-control)] border border-border p-4 transition-colors hover:bg-secondary/60"><input className="size-5 accent-primary" name="policyId" type="checkbox" value={option.id} defaultChecked={selectedIds.includes(option.id)} /><span className="min-w-0"><span className="block truncate text-sm font-semibold">{option.title}</span><span className="mt-1 block text-xs text-muted-foreground">{categoryLabels[option.category] ?? "기타"}</span></span></label></li>)}</ul>}
           </form>
         </section>
 
         {comparison && result ? <section className="ui-card mt-6 p-6 sm:p-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="ui-eyebrow">의사결정 요약</p><h2 className="mt-1 text-xl font-semibold">최근 비교</h2><p className="mt-2 text-sm text-muted-foreground">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeZone: "Asia/Seoul" }).format(new Date(comparison.createdAt))}{comparison.isStale ? " · 정책 정보가 바뀌어 다시 비교가 필요해요" : ""}</p></div>{comparison.isStale ? <form action={requestComparison}>{selectedIds.map((id) => <input key={id} name="policyId" type="hidden" value={id} />)}<button className="ui-primary-action" type="submit">최신 정보로 다시 비교</button></form> : null}</div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="ui-eyebrow">의사결정 요약</p><h2 className="mt-1 text-xl font-semibold">최근 비교</h2><p className="mt-2 text-sm text-muted-foreground">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeZone: "Asia/Seoul" }).format(new Date(comparison.createdAt))}{comparison.isStale ? " · 정책 정보가 바뀌어 다시 비교가 필요해요" : ""}</p></div>{comparison.isStale ? <form action={requestComparison}>{selectedIds.map((id) => <input key={id} name="policyId" type="hidden" value={id} />)}<AiSubmitButton idleLabel="최신 정보로 다시 비교" pendingLabel="AI 비교 중…" /></form> : null}</div>
           <p className="mt-6 rounded-[var(--radius-control)] bg-secondary/60 p-4 text-sm leading-6">{result.overview}</p>
 
           <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[760px] border-collapse text-left text-sm"><thead><tr className="border-b border-border"><th className="p-3 font-semibold">비교 항목</th>{selectedIds.map((id) => <th className="p-3 font-semibold" key={id}><Link className="text-primary" href={`/policies/${id}`}>{comparison.policyTitles[id] ?? "정책"}</Link></th>)}<th className="p-3 font-semibold">핵심 차이</th></tr></thead><tbody>{comparison.sourceRows.map((row) => { const aiDifference = result.comparisonRows.find((item) => item.label === row.label)?.difference; return <tr className="border-b border-border last:border-0" key={row.label}><th className="p-3 align-top font-semibold">{row.label}</th>{selectedIds.map((id) => <td className="whitespace-pre-line p-3 align-top leading-6" key={id}>{row.values[id] ?? "원문에 정보 없음"}</td>)}<td className="p-3 align-top leading-6 text-muted-foreground">{aiDifference ?? "원문 정보를 직접 확인해 주세요."}</td></tr>; })}</tbody></table></div>

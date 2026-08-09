@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { AiSubmitButton } from "@/components/ai/ai-submit-button";
 import { createClient } from "@/lib/supabase/server";
 import { getAnalysis } from "@/server/ai/analysis";
 
@@ -54,7 +55,12 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
               <h2 className="text-xl font-semibold">최근 분석</h2>
               {analysis ? <p className="mt-2 text-sm text-muted-foreground">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeZone: "Asia/Seoul" }).format(new Date(analysis.createdAt))}{analysis.isStale ? " · 챙김 정보가 바뀌어 오래된 결과예요" : ""}</p> : <p className="mt-2 text-sm text-muted-foreground">아직 분석 결과가 없어요.</p>}
             </div>
-            <form action={requestAnalysis}><button className="ui-primary-action" type="submit">{analysis ? "다시 분석하기" : "분석 시작하기"}</button></form>
+            <form action={requestAnalysis}>
+              <AiSubmitButton
+                idleLabel={analysis ? "다시 분석하기" : "분석 시작하기"}
+                pendingLabel="AI 분석 중…"
+              />
+            </form>
           </div>
 
           {result && analysis ? <div className="mt-8 grid gap-8">
