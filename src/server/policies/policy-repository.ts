@@ -6,7 +6,7 @@ import { normalizedPolicySchema, type NormalizedPolicy } from "./normalized-poli
 import { normalizedPolicyToRow, type PolicyRow } from "./policy-row";
 import type { PolicyLifecycleStatus } from "./policy-lifecycle";
 
-type PolicyLookupRow = { id: string };
+type PolicyLookupRow = { id: string; version_hash?: string };
 type UpsertPolicyOptions = Readonly<{
   lifecycleStatus?: PolicyLifecycleStatus;
 }>;
@@ -22,11 +22,11 @@ function sourcePath(source: NormalizedPolicy["sources"][number]): string {
   return `source_refs->${source}->>externalId`;
 }
 
-async function findExistingPolicyId(
+async function findExistingPolicy(
   client: SupabaseClient,
   policy: NormalizedPolicy,
-): Promise<string | null> {
-  const existingIds = new Set<string>();
+): Promise<{ id: string; versionHash?: string } | null> {
+  const existingPolicies = new Map<string, string | undefined>();
 
   for (const source of policy.sources) {
     const reference = policy.sourceRefs[source];
@@ -36,7 +36,7 @@ async function findExistingPolicyId(
 
     const { data, error } = await client
       .from("policies")
-      .select("id")
+      .select("id,version_hash")
       .eq(sourcePath(source), reference.externalId)
       .maybeSingle<PolicyLookupRow>();
 
@@ -45,32 +45,33 @@ async function findExistingPolicyId(
         `정책 조회에 실패했습니다: ${error.message}`,
       );
     }
-    if (data) existingIds.add(data.id);
+    if (data) existingPolicies.set(data.id, data.version_hash);
   }
 
-  if (existingIds.size > 1) {
+  if (existingPolicies.size > 1) {
     throw new PolicyRepositoryError(
       "서로 다른 대표 정책에 연결된 출처를 자동 병합할 수 없습니다",
     );
   }
 
-  return [...existingIds][0] ?? null;
+  const existing = [...existingPolicies.entries()][0];
+  return existing ? { id: existing[0], versionHash: existing[1] } : null;
 }
 
 export async function upsertNormalizedPolicy(
   client: SupabaseClient,
   input: NormalizedPolicy,
   options: UpsertPolicyOptions = {},
-): Promise<{ id: string; row: PolicyRow }> {
+): Promise<{ id: string; row: PolicyRow; wasChanged: boolean }> {
   const policy = normalizedPolicySchema.parse(input);
   const row = normalizedPolicyToRow(policy, options.lifecycleStatus);
-  const existingId = await findExistingPolicyId(client, policy);
+  const existingPolicy = await findExistingPolicy(client, policy);
 
-  if (existingId) {
+  if (existingPolicy) {
     const { data, error } = await client
       .from("policies")
       .update(row)
-      .eq("id", existingId)
+      .eq("id", existingPolicy.id)
       .select("id")
       .single<PolicyLookupRow>();
 
@@ -80,7 +81,11 @@ export async function upsertNormalizedPolicy(
       );
     }
 
-    return { id: data.id, row };
+    return {
+      id: data.id,
+      row,
+      wasChanged: existingPolicy.versionHash !== row.version_hash,
+    };
   }
 
   const { data, error } = await client
@@ -95,5 +100,5 @@ export async function upsertNormalizedPolicy(
     );
   }
 
-  return { id: data.id, row };
+  return { id: data.id, row, wasChanged: false };
 }

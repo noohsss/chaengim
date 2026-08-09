@@ -23,6 +23,7 @@ export type PolicySyncSourceResult = Readonly<{
   fetched: number;
   upserted: number;
   failed: number;
+  changedPolicyIds: readonly string[];
   error?: string;
 }>;
 
@@ -129,6 +130,7 @@ async function syncYouthCenter(
     const records = await fetchAllYouthCenterPolicies();
     let upserted = 0;
     let failed = 0;
+    const changedPolicyIds: string[] = [];
 
     for (const [index, record] of records.entries()) {
       const parsed = youthCenterPolicySchema.safeParse(record);
@@ -139,9 +141,10 @@ async function syncYouthCenter(
       }
       try {
         const policy = normalizeYouthCenterPolicy(parsed.data);
-        await upsertNormalizedPolicy(client, policy, {
+        const savedPolicy = await upsertNormalizedPolicy(client, policy, {
           lifecycleStatus: getPolicyLifecycleStatus(policy),
         });
+        if (savedPolicy.wasChanged) changedPolicyIds.push(savedPolicy.id);
         upserted += 1;
       } catch (error) {
         logFailedItem("youth_center", parsed.data.plcyNo, error);
@@ -149,13 +152,20 @@ async function syncYouthCenter(
       }
     }
 
-    return { source: "youth_center", fetched: records.length, upserted, failed };
+    return {
+      source: "youth_center",
+      fetched: records.length,
+      upserted,
+      failed,
+      changedPolicyIds,
+    };
   } catch (error) {
     return {
       source: "youth_center",
       fetched: 0,
       upserted: 0,
       failed: 0,
+      changedPolicyIds: [],
       error: errorMessage(error),
     };
   }
