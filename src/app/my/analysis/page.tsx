@@ -6,6 +6,7 @@ import { BrandLogo } from "@/components/brand/brand-logo";
 import { AiSubmitButton } from "@/components/ai/ai-submit-button";
 import { PageBackButton } from "@/components/navigation/page-back-button";
 import { createClient } from "@/lib/supabase/server";
+import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { getAnalysis } from "@/server/ai/analysis";
 
 import { requestAnalysis } from "./actions";
@@ -27,6 +28,11 @@ const fitStatusLabels = {
   needs_confirmation: "확인 필요",
   potential_mismatch: "불일치 가능성",
 } as const;
+
+function getRegionLabel(code: string): string {
+  if (code === "00") return "전국";
+  return REGION_OPTIONS.find((option) => option.value === code)?.label ?? code;
+}
 
 export default async function AnalysisPage({ searchParams }: AnalysisPageProps) {
   const params = await searchParams;
@@ -71,6 +77,8 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
             <p className="rounded-[var(--radius-control)] bg-secondary/60 p-4 text-sm leading-6">{result.overview}</p>
 
             {analysis.profileMissingFields.length > 0 ? <aside className="rounded-[var(--radius-control)] border border-border p-4 text-sm leading-6"><strong>개인화에 필요한 정보:</strong> {analysis.profileMissingFields.join(", ")}가 비어 있어 일부 조건은 확인 필요로 표시됩니다. <Link className="font-medium text-primary" href="/settings">프로필 채우기</Link></aside> : null}
+
+            {analysis.regionMismatches.length > 0 ? <aside className="rounded-[var(--radius-control)] border border-[var(--destructive)]/30 bg-[var(--destructive)]/5 p-4 text-sm leading-6" role="note"><strong>지역 조건을 확인해 주세요.</strong><ul className="mt-2 grid gap-1">{analysis.regionMismatches.map((mismatch) => <li key={mismatch.policyId}><strong>{analysis.policyTitles[mismatch.policyId] ?? "정책"}</strong>은(는) {mismatch.policyRegionCodes.map(getRegionLabel).join(", ")} 대상이고, 내 프로필 지역은 {getRegionLabel(mismatch.profileRegionCode)}예요. 신청 전 공식 안내에서 지역 조건을 다시 확인해 주세요.</li>)}</ul></aside> : null}
 
             <section>
               <div className="flex items-end justify-between gap-4"><div><p className="ui-eyebrow">오늘의 행동 순서</p><h3 className="mt-1 text-xl font-semibold">먼저 확인할 정책</h3></div><span className="text-xs text-muted-foreground">우선순위와 마감 기준</span></div>

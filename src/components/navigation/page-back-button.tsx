@@ -26,7 +26,7 @@ export function PageBackButton({ fallbackHref }: PageBackButtonProps): ReactElem
   return (
     <button
       aria-label="이전으로 돌아가기"
-      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="ui-secondary-action min-h-10 shrink-0 bg-white/75 px-3 shadow-sm hover:bg-white sm:px-4"
       onClick={handleClick}
       type="button"
     >

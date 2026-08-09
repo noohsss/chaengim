@@ -10,6 +10,7 @@ import { getGeminiEnv } from "@/lib/env/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildPolicyFact, sortPolicyFactsForAction, type PolicyFact } from "@/server/policies/policy-facts";
 import { todayInSeoul } from "@/server/policies/policy-lifecycle";
+import { doesPolicyMatchRegion } from "@/server/policies/policy-region";
 import { getProfileForUser } from "@/server/profile/profile-repository";
 import { AI_REQUEST_WINDOW_MS, isAiRequestRateLimited } from "./request-policy";
 
@@ -42,6 +43,7 @@ const savedAnalysisRowSchema = z.object({
     organization_name: z.string().nullable(),
     contact: z.string().nullable(),
     category: z.enum(["jobs_startup", "housing", "education", "finance", "welfare_culture", "participation_rights", "other"]),
+    region_codes: z.array(z.string()),
     version_hash: z.string(),
   }).nullable(),
 });
@@ -104,7 +106,14 @@ export type AnalysisView = Readonly<{
   policyTitles: Readonly<Record<string, string>>;
   policyFacts: readonly PolicyFact[];
   profileMissingFields: readonly string[];
+  regionMismatches: readonly RegionMismatch[];
   result: AnalysisResult;
+}>;
+
+export type RegionMismatch = Readonly<{
+  policyId: string;
+  policyRegionCodes: readonly string[];
+  profileRegionCode: string;
 }>;
 
 export class AnalysisError extends Error {
@@ -124,7 +133,7 @@ async function getUserId(client: SupabaseClient): Promise<string> {
 export async function listSavedPoliciesForAi(client: SupabaseClient): Promise<readonly SavedAnalysisRow[]> {
   const { data, error } = await client
     .from("saved_policies")
-    .select("policy_id,status,priority,memo,policies(id,title,summary,support_content,eligibility,application_start_date,application_end_date,application_period_text,is_rolling,application_method,application_url,organization_name,contact,category,version_hash)")
+    .select("policy_id,status,priority,memo,policies(id,title,summary,support_content,eligibility,application_start_date,application_end_date,application_period_text,is_rolling,application_method,application_url,organization_name,contact,category,region_codes,version_hash)")
     .order("updated_at", { ascending: false });
   if (error) throw new AnalysisError("database_error", "챙긴 정책을 불러오지 못했습니다");
   const parsed = z.array(savedAnalysisRowSchema).safeParse(data);
@@ -150,6 +159,24 @@ function getInput(rows: readonly SavedAnalysisRow[], profile: Awaited<ReturnType
       policy: row.policies,
     })),
   };
+}
+
+function getRegionMismatches(
+  rows: readonly SavedAnalysisRow[],
+  profile: Awaited<ReturnType<typeof getProfileForUser>>,
+): readonly RegionMismatch[] {
+  const profileRegionCode = profile?.region_code;
+  if (!profileRegionCode) return [];
+
+  return rows.flatMap((row) => {
+    const policy = row.policies;
+    if (!policy || doesPolicyMatchRegion(profileRegionCode, policy.region_codes)) return [];
+    return [{
+      policyId: row.policy_id,
+      policyRegionCodes: policy.region_codes,
+      profileRegionCode,
+    }];
+  });
 }
 
 function buildFacts(rows: readonly SavedAnalysisRow[]): readonly PolicyFact[] {
@@ -226,7 +253,7 @@ async function generateAnalysis(input: unknown): Promise<AnalysisResult> {
   }
 }
 
-async function getLatestResult(client: SupabaseClient, userId: string, inputHash: string, policyTitles: Readonly<Record<string, string>>, policyFacts: readonly PolicyFact[], profileMissingFields: readonly string[]): Promise<AnalysisView | undefined> {
+async function getLatestResult(client: SupabaseClient, userId: string, inputHash: string, policyTitles: Readonly<Record<string, string>>, policyFacts: readonly PolicyFact[], profileMissingFields: readonly string[], regionMismatches: readonly RegionMismatch[]): Promise<AnalysisView | undefined> {
   const exact = await client.from("ai_results").select("created_at,input_hash,model_name,policy_ids,result").eq("user_id", userId).eq("result_type", "analysis").eq("input_hash", inputHash).maybeSingle();
   if (exact.error) throw new AnalysisError("database_error", "최근 분석 결과를 불러오지 못했습니다");
   const latest = exact.data ? exact : await client.from("ai_results").select("created_at,input_hash,model_name,policy_ids,result").eq("user_id", userId).eq("result_type", "analysis").order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -237,7 +264,7 @@ async function getLatestResult(client: SupabaseClient, userId: string, inputHash
   if (!parsed.success) throw new AnalysisError("database_error", "저장된 분석 결과 형식이 올바르지 않습니다");
   const result = analysisResultSchema.safeParse(parsed.data.result);
   if (!result.success) throw new AnalysisError("database_error", "저장된 분석 결과를 사용할 수 없습니다");
-  return { createdAt: parsed.data.created_at, isStale: parsed.data.input_hash !== inputHash, modelName: parsed.data.model_name, policyTitles, policyFacts, profileMissingFields, result: result.data };
+  return { createdAt: parsed.data.created_at, isStale: parsed.data.input_hash !== inputHash, modelName: parsed.data.model_name, policyTitles, policyFacts, profileMissingFields, regionMismatches, result: result.data };
 }
 
 export async function getAnalysis(client: SupabaseClient): Promise<AnalysisView | undefined> {
@@ -252,7 +279,7 @@ export async function getAnalysis(client: SupabaseClient): Promise<AnalysisView 
   const profile = await getProfileForUser(client, userId);
   const input = getInput(rows, profile);
   const policyTitles = Object.fromEntries(rows.map((row) => [row.policy_id, row.policies?.title ?? "정책"]));
-  return getLatestResult(client, userId, hashInput(input), policyTitles, buildFacts(rows), getProfileMissingFields(profile));
+  return getLatestResult(client, userId, hashInput(input), policyTitles, buildFacts(rows), getProfileMissingFields(profile), getRegionMismatches(rows, profile));
 }
 
 export async function runAnalysis(client: SupabaseClient): Promise<AnalysisView> {
@@ -265,8 +292,9 @@ export async function runAnalysis(client: SupabaseClient): Promise<AnalysisView>
   const policyTitles = Object.fromEntries(rows.map((row) => [row.policy_id, row.policies?.title ?? "정책"]));
   const policyFacts = buildFacts(rows);
   const profileMissingFields = getProfileMissingFields(profile);
+  const regionMismatches = getRegionMismatches(rows, profile);
   const adminClient = createAdminClient();
-  const cached = await getLatestResult(adminClient, userId, inputHash, policyTitles, policyFacts, profileMissingFields);
+  const cached = await getLatestResult(adminClient, userId, inputHash, policyTitles, policyFacts, profileMissingFields, regionMismatches);
   if (cached && !cached.isStale) return cached;
   const { data: recentRequests, error: recentRequestsError } = await adminClient
     .from("ai_results")
@@ -284,5 +312,5 @@ export async function runAnalysis(client: SupabaseClient): Promise<AnalysisView>
   const parsed = analysisRowSchema.safeParse(data);
   const parsedResult = parsed.success ? analysisResultSchema.safeParse(parsed.data.result) : { success: false as const };
   if (!parsed.success || !parsedResult.success) throw new AnalysisError("database_error", "저장된 분석 결과 형식이 올바르지 않습니다");
-  return { createdAt: parsed.data.created_at, isStale: false, modelName: parsed.data.model_name, policyTitles, policyFacts, profileMissingFields, result: parsedResult.data };
+  return { createdAt: parsed.data.created_at, isStale: false, modelName: parsed.data.model_name, policyTitles, policyFacts, profileMissingFields, regionMismatches, result: parsedResult.data };
 }
