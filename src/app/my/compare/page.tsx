@@ -12,6 +12,16 @@ type ComparePageProps = Readonly<{ searchParams: Promise<Record<string, string |
 
 function firstParam(value: string | string[] | undefined): string | undefined { return Array.isArray(value) ? value[0] : value; }
 
+const categoryLabels: Readonly<Record<string, string>> = {
+  jobs_startup: "일자리·창업",
+  housing: "주거",
+  education: "교육",
+  finance: "금융",
+  welfare_culture: "복지·문화",
+  participation_rights: "참여·권리",
+  other: "기타",
+};
+
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   const params = await searchParams;
   const status = firstParam(params.status);
@@ -46,7 +56,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
               <div><h2 className="text-xl font-semibold">비교할 정책 선택</h2><p className="mt-2 text-sm text-muted-foreground">정확히 2~3개를 선택할 수 있어요.</p></div>
               <button className="ui-primary-action" type="submit">선택한 정책 비교하기</button>
             </div>
-            {options.length === 0 ? <p className="mt-8 rounded-[var(--radius-control)] border border-dashed p-6 text-center text-sm text-muted-foreground">아직 챙긴 정책이 없어요.</p> : <ul className="mt-6 grid gap-3 sm:grid-cols-2">{options.map((option) => <li key={option.id}><label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-[var(--radius-control)] border border-border p-4 transition-colors hover:bg-secondary/60"><input className="size-5 accent-primary" name="policyId" type="checkbox" value={option.id} defaultChecked={selectedIds.includes(option.id)} /><span className="min-w-0"><span className="block truncate text-sm font-semibold">{option.title}</span><span className="mt-1 block text-xs text-muted-foreground">{option.category}</span></span></label></li>)}</ul>}
+            {options.length === 0 ? <p className="mt-8 rounded-[var(--radius-control)] border border-dashed p-6 text-center text-sm text-muted-foreground">아직 챙긴 정책이 없어요.</p> : <ul className="mt-6 grid gap-3 sm:grid-cols-2">{options.map((option) => <li key={option.id}><label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-[var(--radius-control)] border border-border p-4 transition-colors hover:bg-secondary/60"><input className="size-5 accent-primary" name="policyId" type="checkbox" value={option.id} defaultChecked={selectedIds.includes(option.id)} /><span className="min-w-0"><span className="block truncate text-sm font-semibold">{option.title}</span><span className="mt-1 block text-xs text-muted-foreground">{categoryLabels[option.category] ?? "기타"}</span></span></label></li>)}</ul>}
           </form>
         </section>
 

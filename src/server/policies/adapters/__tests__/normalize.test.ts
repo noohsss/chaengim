@@ -8,6 +8,7 @@ import {
   normalizeYouthCenterPolicy,
   normalizedPolicyToRow,
 } from "../index";
+import { replaceYouthCenterEligibilityCodes } from "../normalize-utils";
 
 const fixturesDir = join(
   process.cwd(),
@@ -58,6 +59,13 @@ test("maps Youth Center eligibility codes to readable labels", async () => {
   assert.match(policy.eligibility ?? "", /취업상태\n미취업자/);
   assert.match(policy.eligibility ?? "", /학력\n대학 졸업/);
   assert.match(policy.eligibility ?? "", /특화분야\n제한없음/);
+});
+
+test("replaces eligibility codes embedded in comparison text", () => {
+  assert.equal(
+    replaceYouthCenterEligibilityCodes("전공 0011009, 취업상태 0013010"),
+    "전공 제한없음, 취업상태 제한없음",
+  );
 });
 
 test("maps a normalized policy to the policies table shape", async () => {

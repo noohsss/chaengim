@@ -9,6 +9,7 @@ import { comparisonResultSchema, type ComparisonResult } from "@/features/ai/com
 import { getGeminiEnv } from "@/lib/env/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfileForUser } from "@/server/profile/profile-repository";
+import { replaceYouthCenterEligibilityCodes } from "@/server/policies/adapters/normalize-utils";
 
 import { listSavedPoliciesForAi, type SavedAnalysisRow } from "./analysis";
 
@@ -83,7 +84,15 @@ function getSelectedRows(rows: readonly SavedAnalysisRow[], policyIds: readonly 
 function makeInput(rows: readonly SavedAnalysisRow[], profile: Awaited<ReturnType<typeof getProfileForUser>>) {
   return {
     profile: profile ? { birthYear: profile.birth_year, regionCode: profile.region_code, employmentStatus: profile.employment_status } : null,
-    policies: rows.map((row) => ({ policyId: row.policy_id, status: row.status, priority: row.priority, memo: row.memo, policy: row.policies })),
+    policies: rows.map((row) => ({
+      policyId: row.policy_id,
+      status: row.status,
+      priority: row.priority,
+      memo: row.memo,
+      policy: row.policies
+        ? { ...row.policies, eligibility: row.policies.eligibility ? replaceYouthCenterEligibilityCodes(row.policies.eligibility) : null }
+        : null,
+    })),
   };
 }
 
@@ -97,7 +106,17 @@ function parseResponse(text: string | undefined, policyIds: ReadonlySet<string>)
   if (!parsed.success) throw new ComparisonError("invalid_response", "AI 비교 결과 형식이 올바르지 않습니다");
   const citedIds = [parsed.data.priorityPolicy, ...parsed.data.needsConfirmation, ...parsed.data.comparisonRows.flatMap((row) => row.values)].map((item) => item.policyId);
   if (citedIds.some((id) => !policyIds.has(id))) throw new ComparisonError("invalid_response", "AI 비교 결과에 알 수 없는 정책이 포함되었습니다");
-  return parsed.data;
+  return {
+    ...parsed.data,
+    overview: replaceYouthCenterEligibilityCodes(parsed.data.overview),
+    comparisonRows: parsed.data.comparisonRows.map((row) => ({
+      ...row,
+      values: row.values.map((value) => ({ ...value, value: replaceYouthCenterEligibilityCodes(value.value) })),
+      difference: replaceYouthCenterEligibilityCodes(row.difference),
+    })),
+    priorityPolicy: { ...parsed.data.priorityPolicy, reason: replaceYouthCenterEligibilityCodes(parsed.data.priorityPolicy.reason) },
+    needsConfirmation: parsed.data.needsConfirmation.map((item) => ({ ...item, reason: replaceYouthCenterEligibilityCodes(item.reason) })),
+  };
 }
 
 async function generateComparison(input: unknown, policyIds: ReadonlySet<string>): Promise<ComparisonResult> {

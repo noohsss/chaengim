@@ -89,6 +89,13 @@ const YOUTH_CENTER_SPECIALIZED_LABELS: Readonly<Record<string, string>> = {
   "0014010": "제한없음",
 };
 
+const YOUTH_CENTER_ALL_ELIGIBILITY_LABELS: Readonly<Record<string, string>> = {
+  ...YOUTH_CENTER_MAJOR_LABELS,
+  ...YOUTH_CENTER_JOB_LABELS,
+  ...YOUTH_CENTER_SCHOOL_LABELS,
+  ...YOUTH_CENTER_SPECIALIZED_LABELS,
+};
+
 export type DateRange = Readonly<{
   startDate?: string;
   endDate?: string;
@@ -169,6 +176,12 @@ export function formatYouthCenterEligibility(value: unknown): string | undefined
       return `${label}\n${mapYouthCenterEligibilityCodes(detail, labels)}`;
     })
     .join("\n\n");
+}
+
+export function replaceYouthCenterEligibilityCodes(value: string): string {
+  return value.replace(/\b00\d{5}\b/g, (code) => {
+    return YOUTH_CENTER_ALL_ELIGIBILITY_LABELS[code] ?? code;
+  });
 }
 
 export function joinTextSections(
