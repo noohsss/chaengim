@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import {
+  APPLICATION_OUTCOME_OPTIONS,
   SAVED_POLICY_PRIORITY_OPTIONS,
   SAVED_POLICY_STATUS_OPTIONS,
 } from "@/features/saved-policies/saved-policy-schema";
@@ -101,6 +102,7 @@ export default async function MyPage({ searchParams }: MyPageProps) {
         </form>
 
         {params.status === "updated" ? <p className="mt-4 text-sm text-accent-foreground" role="status">변경 내용을 저장했어요.</p> : null}
+        {params.status === "result_required" ? <p className="mt-4 text-sm text-destructive" role="alert">결과 기록을 저장하려면 신청 결과를 선택해 주세요.</p> : null}
         {params.status === "update_failed" ? <p className="mt-4 text-sm text-destructive" role="alert">변경 내용을 저장하지 못했어요. 다시 시도해 주세요.</p> : null}
 
         {visiblePolicies.length === 0 ? (
@@ -127,19 +129,16 @@ export default async function MyPage({ searchParams }: MyPageProps) {
                     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Flag aria-hidden="true" size={13} />{statusLabels[item.status]}</span>
                     <span className="rounded-full bg-muted px-2.5 py-1">우선순위 {SAVED_POLICY_PRIORITY_OPTIONS.find((option) => option.value === item.priority)?.label}</span>
                   </div>
-                  <form action={updateSavedPolicy} className="mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                  <form action={updateSavedPolicy} className="mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-2">
                     <input name="policyId" type="hidden" value={item.policy_id} />
                     <input name="returnPath" type="hidden" value={currentPath} />
-                    {item.status === "result_recorded" ? (
-                      <div className="grid gap-2 text-sm font-medium">
-                        상태
-                        <p className="flex min-h-10 items-center rounded-lg border border-input bg-muted px-3 text-sm font-normal">결과 기록</p>
-                      </div>
-                    ) : (
-                      <label className="grid gap-2 text-sm font-medium">상태<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.status} name="status">{SAVED_POLICY_STATUS_OPTIONS.filter((option) => option.value !== "result_recorded").map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-                    )}
+                    <label className="grid gap-2 text-sm font-medium">상태<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.status} name="status">{SAVED_POLICY_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
                     <label className="grid gap-2 text-sm font-medium">우선순위<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.priority} name="priority">{SAVED_POLICY_PRIORITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-                    <button className="min-h-10 rounded-lg border border-primary px-4 text-sm font-semibold text-primary transition-colors hover:bg-secondary" type="submit">저장</button>
+                    <label className="grid gap-2 text-sm font-medium sm:col-span-2">메모<textarea className="min-h-24 rounded-lg border border-input bg-background px-3 py-2 text-sm" defaultValue={item.memo ?? ""} maxLength={5000} name="memo" placeholder="신청 전에 확인할 내용을 적어 두세요." /></label>
+                    <label className="grid gap-2 text-sm font-medium">신청 결과<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.outcome ?? ""} name="outcome"><option value="">선택하지 않음</option>{APPLICATION_OUTCOME_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+                    <label className="grid gap-2 text-sm font-medium">결과일<input className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.result_date ?? ""} name="resultDate" type="date" /></label>
+                    <label className="grid gap-2 text-sm font-medium sm:col-span-2">결과 메모<textarea className="min-h-24 rounded-lg border border-input bg-background px-3 py-2 text-sm" defaultValue={item.result_memo ?? ""} maxLength={5000} name="resultMemo" placeholder="결과와 관련된 메모를 남겨 주세요." /></label>
+                    <button className="min-h-10 justify-self-start rounded-lg border border-primary px-4 text-sm font-semibold text-primary transition-colors hover:bg-secondary" type="submit">변경 저장</button>
                   </form>
                   {policy.application_url ? <a className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary" href={policy.application_url} rel="noreferrer" target="_blank">공식 신청 페이지<ExternalLink aria-hidden="true" size={14} /></a> : null}
                 </li>

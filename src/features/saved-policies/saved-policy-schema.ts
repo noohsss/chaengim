@@ -14,11 +14,21 @@ export const SAVED_POLICY_PRIORITY_OPTIONS = [
   { label: "높음", value: "high" },
 ] as const;
 
+export const APPLICATION_OUTCOME_OPTIONS = [
+  { label: "선정", value: "selected" },
+  { label: "탈락", value: "rejected" },
+  { label: "대기", value: "waitlisted" },
+  { label: "취소", value: "cancelled" },
+] as const;
+
 export const savedPolicyStatusSchema = z.enum(
   SAVED_POLICY_STATUS_OPTIONS.map((option) => option.value),
 );
 export const savedPolicyPrioritySchema = z.enum(
   SAVED_POLICY_PRIORITY_OPTIONS.map((option) => option.value),
+);
+export const applicationOutcomeSchema = z.enum(
+  APPLICATION_OUTCOME_OPTIONS.map((option) => option.value),
 );
 
 export type SavedPolicyStatus = z.infer<typeof savedPolicyStatusSchema>;
