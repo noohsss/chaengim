@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
+import { todayInSeoul } from "./policy-lifecycle";
+
 const publicPolicyRowSchema = z.object({
   id: z.uuid(),
   title: z.string(),
@@ -83,6 +85,9 @@ export async function listPublicPolicies(
       { count: "exact" },
     )
     .eq("lifecycle_status", "active")
+    .or(
+      `application_end_date.is.null,is_rolling.eq.true,application_end_date.gte.${todayInSeoul()}`,
+    )
     .order("application_end_date", { ascending: true, nullsFirst: false })
     .range(from, from + pageSize - 1);
 
