@@ -59,9 +59,11 @@ export const profileSchema = z.object({
   employment_status: employmentStatusSchema.nullable(),
   id: z.uuid(),
   notification_email: z.email().nullable(),
-  notification_email_verified_at: z.iso.datetime().nullable(),
+  notification_email_verified_at: z
+    .iso.datetime({ local: true, offset: true })
+    .nullable(),
   region_code: regionCodeSchema.nullable(),
-  updated_at: z.iso.datetime(),
+  updated_at: z.iso.datetime({ local: true, offset: true }),
 });
 
 export type Profile = z.infer<typeof profileSchema>;
