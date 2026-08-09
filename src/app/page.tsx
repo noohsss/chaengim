@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   listPublicPolicies,
   type PolicySearchParams,
 } from "@/server/policies/policy-query";
+import { CalendarDays, MapPin } from "lucide-react";
 
 const categoryLabels: Readonly<Record<string, string>> = {
   jobs_startup: "일자리·창업",
@@ -47,18 +49,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const policies = await listPublicPolicies(await createClient(), filters);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-16">
-      <header>
-        <p className="text-sm font-semibold text-blue-700">챙김</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight">
+    <main className="mx-auto min-h-screen max-w-6xl px-6 py-10 sm:py-16">
+      <header className="rounded-3xl bg-gradient-to-br from-secondary via-white to-accent px-6 py-8 sm:px-10 sm:py-12">
+        <BrandLogo priority />
+        <p className="mt-10 text-sm font-semibold text-secondary-foreground">
+          필요한 혜택을 한눈에
+        </p>
+        <h1 className="mt-3 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
           받을 수 있는 혜택, 놓치지 않게.
         </h1>
-        <p className="mt-3 text-neutral-600">
+        <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
           정부와 지자체의 청년 정책을 한 곳에서 찾아보세요.
         </p>
       </header>
 
-      <form className="mt-10 grid gap-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:grid-cols-[1fr_180px_140px_auto]">
+      <form className="mt-8 grid gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:grid-cols-[1fr_180px_140px_auto]">
         <label className="sr-only" htmlFor="search">
           정책 검색
         </label>
@@ -67,7 +72,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           name="search"
           defaultValue={filters.search}
           placeholder="정책명으로 검색"
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
         />
         <label className="sr-only" htmlFor="category">
           카테고리
@@ -76,7 +81,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           id="category"
           name="category"
           defaultValue={filters.category ?? ""}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
         >
           <option value="">전체 카테고리</option>
           {Object.entries(categoryLabels).map(([value, label]) => (
@@ -93,11 +98,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           name="region"
           defaultValue={filters.region}
           placeholder="지역 코드"
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
         />
         <button
           type="submit"
-          className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
         >
           검색
         </button>
@@ -109,15 +114,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <h2 id="policy-list-title" className="text-2xl font-semibold">
               지금 확인할 정책
             </h2>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               마감이 가까운 순으로 보여드려요.
             </p>
           </div>
-          <span className="text-sm text-neutral-500">{policies.length}개</span>
+          <span className="text-sm text-muted-foreground">{policies.length}개</span>
         </div>
 
         {policies.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-neutral-300 px-6 py-14 text-center text-sm text-neutral-500">
+          <div className="mt-6 rounded-2xl border border-dashed border-border px-6 py-14 text-center text-sm text-muted-foreground">
             조건에 맞는 정책이 없습니다. 검색어와 필터를 바꿔보세요.
           </div>
         ) : (
@@ -125,18 +130,24 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             {policies.map((policy) => (
               <li
                 key={policy.id}
-                className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
               >
-                <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
-                  <span>{categoryLabels[policy.category]}</span>
-                  <span>{formatDeadline(policy)}</span>
+                <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">
+                    {categoryLabels[policy.category]}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CalendarDays aria-hidden="true" size={14} />
+                    {formatDeadline(policy)}
+                  </span>
                 </div>
                 <h3 className="mt-3 text-lg font-semibold">{policy.title}</h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-6 text-neutral-600">
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
                   {policy.summary ?? "지원 내용을 확인해보세요."}
                 </p>
                 {policy.organization_name ? (
-                  <p className="mt-4 text-xs text-neutral-500">
+                  <p className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPin aria-hidden="true" size={14} />
                     {policy.organization_name}
                   </p>
                 ) : null}
