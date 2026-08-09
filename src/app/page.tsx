@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
 import {
   listPublicPolicies,
@@ -59,11 +60,25 @@ function firstParam(value: string | string[] | undefined): string | undefined {
 function toSearchParams(
   params: Record<string, string | string[] | undefined>,
 ): PolicySearchParams {
+  const pageValue = Number(firstParam(params.page));
+
   return {
     search: firstParam(params.search),
     category: firstParam(params.category),
     region: firstParam(params.region),
+    page: Number.isInteger(pageValue) && pageValue >= 1 ? pageValue : 1,
   };
+}
+
+function pageHref(filters: PolicySearchParams, page: number): string {
+  const params = new URLSearchParams();
+  if (filters.search) params.set("search", filters.search);
+  if (filters.category) params.set("category", filters.category);
+  if (filters.region) params.set("region", filters.region);
+  if (page > 1) params.set("page", String(page));
+
+  const query = params.toString();
+  return query ? `/?${query}#policies` : "/#policies";
 }
 
 function formatDeadline(policy: {
@@ -78,7 +93,8 @@ function formatDeadline(policy: {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const filters = toSearchParams(await searchParams);
-  const policies = await listPublicPolicies(await createClient(), filters);
+  const policyPage = await listPublicPolicies(await createClient(), filters);
+  const { policies } = policyPage;
 
   return (
     <main className="min-h-screen overflow-hidden">
@@ -325,15 +341,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               ))}
             </select>
             <label className="sr-only" htmlFor="region">
-              시·도 코드
+              지역
             </label>
-            <input
+            <select
               className="min-h-11 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-secondary"
               defaultValue={filters.region}
               id="region"
               name="region"
-              placeholder="지역 코드"
-            />
+            >
+              <option value="">전체 지역</option>
+              {REGION_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             <button
               className="min-h-11 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
               type="submit"
@@ -349,7 +371,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 놓치기 전에 신청 조건을 확인해 보세요.
               </p>
             </div>
-            <span className="text-sm text-muted-foreground">{policies.length}개</span>
+            <span className="text-sm text-muted-foreground">{policyPage.totalCount}개</span>
           </div>
 
           {policies.length === 0 ? (
@@ -389,6 +411,33 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               ))}
             </ul>
           )}
+
+          {policyPage.totalPages > 1 ? (
+            <nav
+              aria-label="정책 목록 페이지"
+              className="mt-8 flex items-center justify-center gap-2"
+            >
+              {policyPage.page > 1 ? (
+                <Link
+                  className="inline-flex min-h-10 items-center rounded-lg border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                  href={pageHref(filters, policyPage.page - 1)}
+                >
+                  이전
+                </Link>
+              ) : null}
+              <span className="px-2 text-sm text-muted-foreground">
+                {policyPage.page} / {policyPage.totalPages}
+              </span>
+              {policyPage.page < policyPage.totalPages ? (
+                <Link
+                  className="inline-flex min-h-10 items-center rounded-lg border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                  href={pageHref(filters, policyPage.page + 1)}
+                >
+                  다음
+                </Link>
+              ) : null}
+            </nav>
+          ) : null}
         </div>
       </section>
 
