@@ -161,6 +161,7 @@ flowchart LR
 - 목록·상세·설정의 최초 데이터 조회는 Server Component에서 수행한다.
 - 검색·필터 상태는 URL query string을 기준으로 공유·새로고침 가능하게 유지한다.
 - 모달, 선택, 즉시 상태 변경처럼 상호작용이 필요한 부분만 Client Component로 분리한다.
+- 정책 목록에서 상세 링크를 열 때는 루트 `@modal` parallel route의 intercepting route가 상세 화면을 모달로 렌더링하고, 직접 `/policies/[id]`에 접근하면 독립 상세 페이지를 렌더링한다.
 - 로그인이 필요한 페이지는 서버에서 세션을 검사하고 `/login?next=...`로 이동한다.
 - 비회원이 챙기기를 누르면 로그인 후 원래 정책에서 챙기기를 이어갈 수 있게 한다.
 
