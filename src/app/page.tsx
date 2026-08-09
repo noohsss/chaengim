@@ -1,5 +1,6 @@
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { AccountMenu } from "@/components/navigation/account-menu";
+import { PolicySummaryCard } from "@/components/policies/policy-summary-card";
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -9,10 +10,8 @@ import {
 import {
   ArrowDown,
   BookmarkCheck,
-  CalendarDays,
   Check,
   ChevronRight,
-  MapPin,
   Search,
   Sparkles,
 } from "lucide-react";
@@ -81,16 +80,6 @@ function pageHref(filters: PolicySearchParams, page: number): string {
 
   const query = params.toString();
   return query ? `/?${query}#policies` : "/#policies";
-}
-
-function formatDeadline(policy: {
-  application_end_date: string | null;
-  application_period_text: string | null;
-  is_rolling: boolean;
-}): string {
-  if (policy.is_rolling) return "상시 모집";
-  if (policy.application_end_date) return `${policy.application_end_date} 마감`;
-  return policy.application_period_text ?? "신청 기간 확인 필요";
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -362,36 +351,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </p>
             </div>
           ) : (
-            <ul className="mt-6 grid gap-4 md:grid-cols-2">
+            <ul className="mt-6 grid gap-5">
               {policies.map((policy) => (
-                <li
-                  className="ui-card p-5 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_1rem_3rem_rgba(37,42,51,0.1)]"
-                  key={policy.id}
-                >
-                  <Link
-                    className="block rounded-xl focus-visible:outline-none"
+                <li key={policy.id}>
+                  <PolicySummaryCard
+                    applicationEndDate={policy.application_end_date}
+                    applicationPeriodText={policy.application_period_text}
+                    category={policy.category}
                     href={`/policies/${policy.id}`}
-                  >
-                    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                    <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">
-                      {categoryLabels[policy.category]}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <CalendarDays aria-hidden="true" size={14} />
-                      {formatDeadline(policy)}
-                    </span>
-                    </div>
-                    <h4 className="mt-3 text-lg font-semibold">{policy.title}</h4>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                      {policy.summary ?? "지원 내용을 확인해 보세요."}
-                    </p>
-                    {policy.organization_name ? (
-                      <p className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin aria-hidden="true" size={14} />
-                        {policy.organization_name}
-                      </p>
-                    ) : null}
-                  </Link>
+                    isRolling={policy.is_rolling}
+                    supportContent={policy.support_content}
+                    title={policy.title}
+                  />
                 </li>
               ))}
             </ul>

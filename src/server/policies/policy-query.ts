@@ -9,6 +9,7 @@ const publicPolicyRowSchema = z.object({
   id: z.uuid(),
   title: z.string(),
   summary: z.string().nullable(),
+  support_content: z.string().nullable(),
   application_end_date: z.iso.date().nullable(),
   application_period_text: z.string().nullable(),
   is_rolling: z.boolean(),
@@ -101,7 +102,7 @@ export async function listPublicPolicies(
   let query = client
     .from("policies")
     .select(
-      "id,title,summary,application_end_date,application_period_text,is_rolling,category,region_codes,organization_name",
+      "id,title,summary,support_content,application_end_date,application_period_text,is_rolling,category,region_codes,organization_name",
       { count: "exact" },
     )
     .eq("lifecycle_status", "active")

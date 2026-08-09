@@ -22,6 +22,7 @@ const savedPolicyRowSchema = z.object({
       id: z.uuid(),
       title: z.string(),
       summary: z.string().nullable(),
+      support_content: z.string().nullable(),
       application_end_date: z.iso.date().nullable(),
       application_period_text: z.string().nullable(),
       is_rolling: z.boolean(),
@@ -55,7 +56,7 @@ export async function listSavedPolicies(
   let query = client
     .from("saved_policies")
     .select(
-      "policy_id,status,priority,memo,outcome,result_date,result_memo,updated_at,policies(id,title,summary,application_end_date,application_period_text,is_rolling,application_url,category,organization_name,lifecycle_status)",
+      "policy_id,status,priority,memo,outcome,result_date,result_memo,updated_at,policies(id,title,summary,support_content,application_end_date,application_period_text,is_rolling,application_url,category,organization_name,lifecycle_status)",
     )
     .order("updated_at", { ascending: false });
 

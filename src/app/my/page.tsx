@@ -1,9 +1,10 @@
-import { CalendarDays, ExternalLink, Flag } from "lucide-react";
+import { ChevronDown, ExternalLink, Flag } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { PolicySummaryCard } from "@/components/policies/policy-summary-card";
 import {
   APPLICATION_OUTCOME_OPTIONS,
   SAVED_POLICY_PRIORITY_OPTIONS,
@@ -13,16 +14,6 @@ import { createClient } from "@/lib/supabase/server";
 import { listSavedPolicies } from "@/server/saved-policies/policy-list";
 
 import { updateSavedPolicy } from "./actions";
-
-const categoryLabels: Readonly<Record<string, string>> = {
-  jobs_startup: "일자리·창업",
-  housing: "주거",
-  education: "교육",
-  finance: "금융",
-  welfare_culture: "복지·문화",
-  participation_rights: "참여·권리",
-  other: "기타",
-};
 
 const statusLabels: Readonly<Record<string, string>> = Object.fromEntries(
   SAVED_POLICY_STATUS_OPTIONS.map((option) => [option.value, option.label]),
@@ -34,16 +25,6 @@ type MyPageProps = Readonly<{
 
 function firstParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function formatDeadline(item: {
-  application_end_date: string | null;
-  application_period_text: string | null;
-  is_rolling: boolean;
-}): string {
-  if (item.is_rolling) return "상시 모집";
-  if (item.application_end_date) return `${item.application_end_date} 마감`;
-  return item.application_period_text ?? "신청 기간 확인 필요";
 }
 
 export default async function MyPage({ searchParams }: MyPageProps) {
@@ -109,35 +90,58 @@ export default async function MyPage({ searchParams }: MyPageProps) {
             <Link className="ui-primary-action mt-6" href="/#policies">정책 찾아보기</Link>
           </section>
         ) : (
-          <ul className="mt-8 grid gap-5 lg:grid-cols-2">
+          <ul className="mt-8 grid gap-5">
             {visiblePolicies.map((item) => {
               const policy = item.policies;
               if (!policy) return null;
 
               return (
-                <li className="ui-card overflow-hidden border-t-4 border-t-[var(--brand-cornflower)] p-5" key={item.policy_id}>
-                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                    <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">{categoryLabels[policy.category]}</span>
-                    <span className="inline-flex items-center gap-1"><CalendarDays aria-hidden="true" size={14} />{formatDeadline(policy)}</span>
-                  </div>
-                  <h2 className="mt-4 text-xl font-semibold"><Link className="hover:text-primary" href={`/policies/${policy.id}`}>{policy.title}</Link></h2>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{policy.summary ?? "지원 내용을 확인해 보세요."}</p>
-                  <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Flag aria-hidden="true" size={13} />{statusLabels[item.status]}</span>
-                    <span className="rounded-full bg-muted px-2.5 py-1">우선순위 {SAVED_POLICY_PRIORITY_OPTIONS.find((option) => option.value === item.priority)?.label}</span>
-                  </div>
-                  <form action={updateSavedPolicy} className="mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-2">
-                    <input name="policyId" type="hidden" value={item.policy_id} />
-                    <input name="returnPath" type="hidden" value={currentPath} />
-                    <label className="grid gap-2 text-sm font-medium">상태<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.status} name="status">{SAVED_POLICY_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-                    <label className="grid gap-2 text-sm font-medium">우선순위<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.priority} name="priority">{SAVED_POLICY_PRIORITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-                    <label className="grid gap-2 text-sm font-medium sm:col-span-2">메모<textarea className="min-h-24 rounded-lg border border-input bg-background px-3 py-2 text-sm" defaultValue={item.memo ?? ""} maxLength={5000} name="memo" placeholder="신청 전에 확인할 내용을 적어 두세요." /></label>
-                    <label className="grid gap-2 text-sm font-medium">신청 결과<select className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.outcome ?? ""} name="outcome"><option value="">선택하지 않음</option>{APPLICATION_OUTCOME_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-                    <label className="grid gap-2 text-sm font-medium">결과일<input className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" defaultValue={item.result_date ?? ""} name="resultDate" type="date" /></label>
-                    <label className="grid gap-2 text-sm font-medium sm:col-span-2">결과 메모<textarea className="min-h-24 rounded-lg border border-input bg-background px-3 py-2 text-sm" defaultValue={item.result_memo ?? ""} maxLength={5000} name="resultMemo" placeholder="결과와 관련된 메모를 남겨 주세요." /></label>
-                    <button className="min-h-10 justify-self-start rounded-lg border border-primary px-4 text-sm font-semibold text-primary transition-colors hover:bg-secondary" type="submit">변경 저장</button>
-                  </form>
-                  {policy.application_url ? <a className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary" href={policy.application_url} rel="noreferrer" target="_blank">공식 신청 페이지<ExternalLink aria-hidden="true" size={14} /></a> : null}
+                <li key={item.policy_id}>
+                  <PolicySummaryCard
+                    actionLabel="상세 보기"
+                    applicationEndDate={policy.application_end_date}
+                    applicationPeriodText={policy.application_period_text}
+                    category={policy.category}
+                    href={`/policies/${policy.id}`}
+                    isRolling={policy.is_rolling}
+                    isSaved
+                    supportContent={policy.support_content}
+                    title={policy.title}
+                  >
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
+                        <Flag aria-hidden="true" size={13} />
+                        {statusLabels[item.status]}
+                      </span>
+                      <span className="rounded-full bg-muted px-2.5 py-1">
+                        우선순위 {SAVED_POLICY_PRIORITY_OPTIONS.find((option) => option.value === item.priority)?.label}
+                      </span>
+                    </div>
+
+                    <details className="group mt-5 overflow-hidden rounded-[var(--radius-control)] border border-border bg-background">
+                      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 [&::-webkit-details-marker]:hidden">
+                        관리 정보 수정
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="transition-transform group-open:rotate-180"
+                          size={18}
+                        />
+                      </summary>
+                      <form action={updateSavedPolicy} className="grid gap-4 border-t border-border p-4 sm:grid-cols-2">
+                        <input name="policyId" type="hidden" value={item.policy_id} />
+                        <input name="returnPath" type="hidden" value={currentPath} />
+                        <label className="grid gap-2 text-sm font-medium">상태<select className="ui-control" defaultValue={item.status} name="status">{SAVED_POLICY_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+                        <label className="grid gap-2 text-sm font-medium">우선순위<select className="ui-control" defaultValue={item.priority} name="priority">{SAVED_POLICY_PRIORITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+                        <label className="grid gap-2 text-sm font-medium sm:col-span-2">메모<textarea className="ui-control min-h-24" defaultValue={item.memo ?? ""} maxLength={5000} name="memo" placeholder="신청 전에 확인할 내용을 적어 두세요." /></label>
+                        <label className="grid gap-2 text-sm font-medium">신청 결과<select className="ui-control" defaultValue={item.outcome ?? ""} name="outcome"><option value="">선택하지 않음</option>{APPLICATION_OUTCOME_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+                        <label className="grid gap-2 text-sm font-medium">결과일<input className="ui-control" defaultValue={item.result_date ?? ""} name="resultDate" type="date" /></label>
+                        <label className="grid gap-2 text-sm font-medium sm:col-span-2">결과 메모<textarea className="ui-control min-h-24" defaultValue={item.result_memo ?? ""} maxLength={5000} name="resultMemo" placeholder="결과와 관련된 메모를 남겨 주세요." /></label>
+                        <button className="ui-primary-action justify-self-start" type="submit">변경 저장</button>
+                      </form>
+                    </details>
+
+                    {policy.application_url ? <a className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary" href={policy.application_url} rel="noreferrer" target="_blank">공식 신청 페이지<ExternalLink aria-hidden="true" size={14} /></a> : null}
+                  </PolicySummaryCard>
                 </li>
               );
             })}
