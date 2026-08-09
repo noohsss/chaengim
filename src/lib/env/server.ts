@@ -9,9 +9,9 @@ const supabaseAdminEnvSchema = z.object({
 const publicApiEnvSchema = z.object({
   YOUTH_CENTER_API_KEY: z.string().min(1),
   YOUTH_CENTER_API_BASE_URL: z.url().default(
-    "https://www.youthcenter.go.kr/opi",
+    "https://www.youthcenter.go.kr/go/ythip/getPlcy",
   ),
-  GOV24_API_KEY: z.string().min(1),
+  GOV24_API_KEY: z.string().min(1).optional(),
   GOV24_API_BASE_URL: z.url().default("https://api.odcloud.kr/api/gov24/v3"),
 });
 

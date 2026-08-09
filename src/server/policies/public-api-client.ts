@@ -23,6 +23,10 @@ type PublicApiRequest = Readonly<{
 }>;
 
 function buildUrl(baseUrl: string, path: string): URL {
+  if (path.length === 0) {
+    return new URL(baseUrl);
+  }
+
   const base = new URL(`${baseUrl.replace(/\/$/, "")}/`);
   const normalizedPath = path.replace(/^\//, "");
   return new URL(normalizedPath, base);
@@ -43,11 +47,17 @@ async function requestJson(
     if (value !== undefined) url.searchParams.set(key, String(value));
   }
 
-  const keyName = request.source === "youth_center" ? "openApiVlak" : "serviceKey";
+  const keyName = request.source === "youth_center" ? "apiKeyNm" : "serviceKey";
   const apiKey =
     request.source === "youth_center"
       ? env.YOUTH_CENTER_API_KEY
       : env.GOV24_API_KEY;
+  if (!apiKey) {
+    throw new PublicApiClientError(
+      "정부24 API 키가 설정되지 않았습니다",
+      request.source,
+    );
+  }
   url.searchParams.set(keyName, apiKey);
 
   let response: Response;
@@ -116,17 +126,36 @@ export async function fetchGov24ServiceDetail(
 }
 
 export async function fetchYouthCenterPolicies(
-  params: Readonly<{ pageIndex?: number; display?: number; query?: string }>,
+  params: Readonly<{
+    pageNum?: number;
+    pageSize?: number;
+    pageType?: "1" | "2";
+    plcyNo?: string;
+    plcyKywdNm?: string;
+    plcyExplnCn?: string;
+    plcyNm?: string;
+    zipCd?: string;
+    lclsfNm?: string;
+    mclsfNm?: string;
+  }>,
   fetcher?: typeof fetch,
 ): Promise<Record<string, unknown>> {
   return requestJson(
     {
       source: "youth_center",
-      path: "youthPlcyList.do",
+      path: "",
       params: {
-        pageIndex: params.pageIndex ?? 1,
-        display: params.display ?? 100,
-        query: params.query,
+        pageNum: params.pageNum ?? 1,
+        pageSize: params.pageSize ?? 100,
+        pageType: params.pageType,
+        plcyNo: params.plcyNo,
+        plcyKywdNm: params.plcyKywdNm,
+        plcyExplnCn: params.plcyExplnCn,
+        plcyNm: params.plcyNm,
+        zipCd: params.zipCd,
+        lclsfNm: params.lclsfNm,
+        mclsfNm: params.mclsfNm,
+        rtnType: "json",
       },
     },
     fetcher,

@@ -4,14 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import {
-  fetchGov24ServiceDetail,
-  fetchGov24ServiceList,
   fetchYouthCenterPolicies,
 } from "./public-api-client";
 import {
-  gov24ServiceDetailSchema,
-  gov24ServiceListItemSchema,
-  normalizeGov24Policy,
   normalizeYouthCenterPolicy,
   youthCenterPolicySchema,
 } from "./adapters";
@@ -57,16 +52,6 @@ function responseRecords(payload: Record<string, unknown>): unknown[] {
   return firstArray(payload.data, payload.result, payload.youthPolicyList);
 }
 
-function responseDetail(payload: Record<string, unknown>): unknown {
-  const data = payload.data;
-  const dataObject = recordSchema.safeParse(data);
-  if (dataObject.success) return dataObject.data;
-  const result = payload.result;
-  const resultObject = recordSchema.safeParse(result);
-  if (resultObject.success) return resultObject.data;
-  return payload;
-}
-
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "알 수 없는 동기화 오류";
 }
@@ -107,49 +92,11 @@ function logFailedItem(
   });
 }
 
-async function syncGov24(client: SupabaseClient): Promise<PolicySyncSourceResult> {
-  try {
-    const listPayload = await fetchGov24ServiceList({ page: 1, perPage: 100 });
-    const listItems = responseRecords(listPayload);
-    let upserted = 0;
-    let failed = 0;
-
-    for (const [index, item] of listItems.entries()) {
-      const parsedItem = gov24ServiceListItemSchema.safeParse(item);
-      if (!parsedItem.success) {
-        logRejectedRecord("gov24", index, parsedItem.error);
-        failed += 1;
-        continue;
-      }
-      try {
-        const detailPayload = await fetchGov24ServiceDetail(parsedItem.data.서비스ID);
-        const detail = gov24ServiceDetailSchema.parse(responseDetail(detailPayload));
-        const policy = normalizeGov24Policy({ detail, listItem: parsedItem.data });
-        await upsertNormalizedPolicy(client, policy);
-        upserted += 1;
-      } catch (error) {
-        logFailedItem("gov24", parsedItem.data.서비스ID, error);
-        failed += 1;
-      }
-    }
-
-    return { source: "gov24", fetched: listItems.length, upserted, failed };
-  } catch (error) {
-    return {
-      source: "gov24",
-      fetched: 0,
-      upserted: 0,
-      failed: 0,
-      error: errorMessage(error),
-    };
-  }
-}
-
 async function syncYouthCenter(
   client: SupabaseClient,
 ): Promise<PolicySyncSourceResult> {
   try {
-    const payload = await fetchYouthCenterPolicies({ pageIndex: 1, display: 100 });
+    const payload = await fetchYouthCenterPolicies({ pageNum: 1, pageSize: 100 });
     const records = responseRecords(payload);
     let upserted = 0;
     let failed = 0;
@@ -184,6 +131,6 @@ async function syncYouthCenter(
 
 export async function syncPolicies(client: SupabaseClient): Promise<PolicySyncResult> {
   const startedAt = new Date().toISOString();
-  const sources = await Promise.all([syncYouthCenter(client), syncGov24(client)]);
+  const sources = [await syncYouthCenter(client)];
   return { startedAt, finishedAt: new Date().toISOString(), sources };
 }
