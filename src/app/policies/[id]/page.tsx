@@ -93,7 +93,6 @@ export default async function PolicyDetailPage({
   const isSaved = await isPolicySaved(client, id);
   const { data: claimsData } = await client.auth.getClaims();
   const isAuthenticated = z.uuid().safeParse(claimsData?.claims.sub).success;
-  const policyPath = `/policies/${policy.id}`;
   const status = firstParam((await searchParams).status);
   const sourceUrl = policy.source_refs.youth_center?.url;
 
@@ -112,7 +111,7 @@ export default async function PolicyDetailPage({
               <SavePolicyButton
                 isAuthenticated={isAuthenticated}
                 isSaved={isSaved}
-                loginPath={createLoginPath(policyPath)}
+                loginPath={createLoginPath("/")}
                 onSave={updateSavedPolicy}
                 policyId={policy.id}
               />
