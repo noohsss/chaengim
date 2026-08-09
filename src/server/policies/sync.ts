@@ -71,6 +71,42 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "알 수 없는 동기화 오류";
 }
 
+function validationIssues(error: z.ZodError): readonly Readonly<{
+  code: string;
+  message: string;
+  path: string;
+}>[] {
+  return error.issues.map((issue) => ({
+    code: issue.code,
+    message: issue.message,
+    path: issue.path.map(String).join("."),
+  }));
+}
+
+function logRejectedRecord(
+  source: PolicySyncSourceResult["source"],
+  index: number,
+  error: z.ZodError,
+): void {
+  console.warn("Policy sync record rejected", {
+    index,
+    issues: validationIssues(error),
+    source,
+  });
+}
+
+function logFailedItem(
+  source: PolicySyncSourceResult["source"],
+  externalId: string,
+  error: unknown,
+): void {
+  console.warn("Policy sync item failed", {
+    error: errorMessage(error),
+    externalId,
+    source,
+  });
+}
+
 async function syncGov24(client: SupabaseClient): Promise<PolicySyncSourceResult> {
   try {
     const listPayload = await fetchGov24ServiceList({ page: 1, perPage: 100 });
@@ -78,9 +114,10 @@ async function syncGov24(client: SupabaseClient): Promise<PolicySyncSourceResult
     let upserted = 0;
     let failed = 0;
 
-    for (const item of listItems) {
+    for (const [index, item] of listItems.entries()) {
       const parsedItem = gov24ServiceListItemSchema.safeParse(item);
       if (!parsedItem.success) {
+        logRejectedRecord("gov24", index, parsedItem.error);
         failed += 1;
         continue;
       }
@@ -90,7 +127,8 @@ async function syncGov24(client: SupabaseClient): Promise<PolicySyncSourceResult
         const policy = normalizeGov24Policy({ detail, listItem: parsedItem.data });
         await upsertNormalizedPolicy(client, policy);
         upserted += 1;
-      } catch {
+      } catch (error) {
+        logFailedItem("gov24", parsedItem.data.서비스ID, error);
         failed += 1;
       }
     }
@@ -116,16 +154,18 @@ async function syncYouthCenter(
     let upserted = 0;
     let failed = 0;
 
-    for (const record of records) {
+    for (const [index, record] of records.entries()) {
       const parsed = youthCenterPolicySchema.safeParse(record);
       if (!parsed.success) {
+        logRejectedRecord("youth_center", index, parsed.error);
         failed += 1;
         continue;
       }
       try {
         await upsertNormalizedPolicy(client, normalizeYouthCenterPolicy(parsed.data));
         upserted += 1;
-      } catch {
+      } catch (error) {
+        logFailedItem("youth_center", parsed.data.plcyNo, error);
         failed += 1;
       }
     }

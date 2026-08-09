@@ -19,5 +19,7 @@ export async function GET(request: Request): Promise<Response> {
     (source) => source.error !== undefined || source.failed > 0,
   );
 
+  console.info("Policy sync completed", result);
+
   return NextResponse.json(result, { status: hasSourceFailure ? 207 : 200 });
 }
