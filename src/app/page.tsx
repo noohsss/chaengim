@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { AccountMenu } from "@/components/navigation/account-menu";
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -119,18 +120,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               >
                 이용 방법
               </a>
-              <Link
-                className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/70 hover:text-foreground"
-                href="/settings"
-              >
-                내 정보
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
-                href={isAuthenticated ? "/my" : "/login"}
-              >
-                {isAuthenticated ? "내 챙김" : "로그인"}
-              </Link>
+              {isAuthenticated ? (
+                <AccountMenu />
+              ) : (
+                <Link
+                  className="flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+                  href="/login"
+                >
+                  로그인
+                </Link>
+              )}
             </div>
           </nav>
 
