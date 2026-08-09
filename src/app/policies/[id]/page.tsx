@@ -6,10 +6,13 @@ import { notFound } from "next/navigation";
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
 import { formatYouthCenterEligibility } from "@/server/policies/adapters/normalize-utils";
+import { isPolicySaved } from "@/server/saved-policies/policy-save";
 import {
   getPublicPolicy,
   type PublicPolicyDetail,
 } from "@/server/policies/policy-query";
+
+import { updateSavedPolicy } from "./actions";
 
 const categoryLabels: Readonly<Record<string, string>> = {
   jobs_startup: "일자리·창업",
@@ -23,6 +26,7 @@ const categoryLabels: Readonly<Record<string, string>> = {
 
 type PolicyPageProps = Readonly<{
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
 function formatPeriod(policy: PublicPolicyDetail): string {
@@ -51,6 +55,16 @@ function formatSyncedAt(value: string): string {
   }).format(new Date(value));
 }
 
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+const statusMessages: Readonly<Record<string, string>> = {
+  removed: "챙긴 정책에서 삭제했어요.",
+  save_failed: "정책을 챙기지 못했어요. 잠시 후 다시 시도해 주세요.",
+  saved: "정책을 챙겼어요. 내 챙김에서 이어서 관리할 수 있어요.",
+};
+
 export async function generateMetadata({ params }: PolicyPageProps): Promise<Metadata> {
   const { id } = await params;
   const policy = await getPublicPolicy(await createClient(), id);
@@ -61,11 +75,17 @@ export async function generateMetadata({ params }: PolicyPageProps): Promise<Met
   };
 }
 
-export default async function PolicyDetailPage({ params }: PolicyPageProps) {
+export default async function PolicyDetailPage({
+  params,
+  searchParams,
+}: PolicyPageProps) {
   const { id } = await params;
-  const policy = await getPublicPolicy(await createClient(), id);
+  const client = await createClient();
+  const policy = await getPublicPolicy(client, id);
   if (!policy) notFound();
 
+  const isSaved = await isPolicySaved(client, id);
+  const status = firstParam((await searchParams).status);
   const sourceUrl = policy.source_refs.youth_center?.url;
 
   return (
@@ -105,6 +125,21 @@ export default async function PolicyDetailPage({ params }: PolicyPageProps) {
                 {formatRegions(policy.region_codes)}
               </span>
             </div>
+            <form action={updateSavedPolicy} className="mt-7">
+              <input name="intent" type="hidden" value={isSaved ? "remove" : "save"} />
+              <input name="policyId" type="hidden" value={policy.id} />
+              <button
+                className="min-h-11 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
+                type="submit"
+              >
+                {isSaved ? "챙겼어요 · 취소하기" : "이 정책 챙기기"}
+              </button>
+            </form>
+            {status && statusMessages[status] ? (
+              <p className="mt-3 text-sm text-accent-foreground" role="status">
+                {statusMessages[status]}
+              </p>
+            ) : null}
           </header>
 
           <div className="grid gap-10 px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[1fr_260px]">
