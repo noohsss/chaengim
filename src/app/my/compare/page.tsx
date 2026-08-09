@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { AiSubmitButton } from "@/components/ai/ai-submit-button";
+import { PageBackButton } from "@/components/navigation/page-back-button";
 import { createClient } from "@/lib/supabase/server";
 import { ComparisonError, getComparison, getComparisonOptions } from "@/server/ai/comparison";
 
@@ -42,6 +43,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-5xl">
+        <PageBackButton fallbackHref="/my" />
         <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
           <Link aria-label="챙김 홈" href="/"><BrandLogo size="compact" /></Link>
           <p className="ui-eyebrow mt-10">정책 비교</p>

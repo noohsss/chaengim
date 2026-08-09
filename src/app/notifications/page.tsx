@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { PageBackButton } from "@/components/navigation/page-back-button";
 import { createClient } from "@/lib/supabase/server";
 import {
   listNotifications,
@@ -85,6 +86,7 @@ export default async function NotificationsPage({
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-3xl">
+        <PageBackButton fallbackHref="/my" />
         <header className="flex items-center justify-between gap-4">
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />

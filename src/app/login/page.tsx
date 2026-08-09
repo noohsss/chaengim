@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { PageBackButton } from "@/components/navigation/page-back-button";
 import { getSafeNextPath } from "@/lib/auth/safe-next-path";
 
 import { signInWithGoogle } from "./actions";
@@ -48,10 +49,12 @@ export default async function LoginPage({
 
   return (
     <main className="ui-page flex items-center justify-center px-6 py-12">
-      <section
-        aria-labelledby="login-title"
-        className="ui-card w-full max-w-md overflow-hidden p-0"
-      >
+      <div className="w-full max-w-md">
+        <PageBackButton fallbackHref="/" />
+        <section
+          aria-labelledby="login-title"
+          className="ui-card mt-4 w-full overflow-hidden p-0"
+        >
         <div className="bg-[var(--brand-sky)] p-6 sm:p-8">
           <BrandLogo priority />
           <p className="ui-eyebrow mt-8">안전하게 이어가기</p>
@@ -105,7 +108,8 @@ export default async function LoginPage({
           로그인하면 챙긴 정책과 진행 상태를 안전하게 저장할 수 있어요.
         </p>
         </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

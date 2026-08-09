@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { DeleteAccountForm } from "@/components/settings/delete-account-form";
+import { PageBackButton } from "@/components/navigation/page-back-button";
 import {
   EMPLOYMENT_STATUS_OPTIONS,
   getCurrentSeoulYear,
@@ -97,6 +98,7 @@ export default async function SettingsPage({
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-2xl">
+        <PageBackButton fallbackHref="/" />
         <header className="flex items-center justify-between gap-4">
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />

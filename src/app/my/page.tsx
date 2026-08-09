@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { PageBackButton } from "@/components/navigation/page-back-button";
 import { PolicySummaryCard } from "@/components/policies/policy-summary-card";
 import {
   APPLICATION_OUTCOME_OPTIONS,
@@ -45,6 +46,7 @@ export default async function MyPage({ searchParams }: MyPageProps) {
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-5xl">
+        <PageBackButton fallbackHref="/" />
         <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />
