@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "ignoreDeprecations": "6.0",
+    "incremental": false,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "outDir": ".tmp/policy-tests",
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": ["src/server/policies/**/*.ts"]
+}

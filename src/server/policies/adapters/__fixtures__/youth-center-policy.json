@@ -1,0 +1,21 @@
+{
+  "plcyNo": "YC-2026-0001",
+  "plcyNm": "청년 취업 준비 지원금",
+  "plcyExplnCn": "구직 청년의 취업 준비 비용을 지원합니다.",
+  "plcySprtCn": "월 50만원씩 최대 6개월 지원",
+  "plcyAplyMthdCn": "온통청년 온라인 신청",
+  "aplyYmd": "2026-05-01 ~ 2026-05-31",
+  "sprtTrgtCn": "미취업 청년",
+  "earnCndCn": "중위소득 150% 이하",
+  "ageInfo": "만 18세 ~ 34세",
+  "jobCd": "미취업자",
+  "schoolCd": "제한없음",
+  "addAplyQlfcCndCn": "주민등록상 경기도 거주",
+  "sprvsnInstCdNm": "경기도",
+  "operInstCdNm": "경기도일자리재단",
+  "aplyUrlAddr": "https://www.youthcenter.go.kr/youngPlcyUnif/youngPlcyUnifDtl.do?bizId=YC-2026-0001",
+  "refUrlAddr1": "https://www.youthcenter.go.kr/youngPlcyUnif/youngPlcyUnifDtl.do?bizId=YC-2026-0001",
+  "plcyKywdNm": "취업,구직,지원금",
+  "lclsfNm": "일자리",
+  "mclsfNm": "취업지원"
+}

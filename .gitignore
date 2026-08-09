@@ -20,6 +20,7 @@ pnpm-debug.log*
 
 # testing
 /coverage
+/.tmp
 
 # editor and OS files
 .DS_Store
