@@ -15,6 +15,8 @@ import { getPolicyLifecycleStatus } from "./policy-lifecycle";
 
 const unknownArraySchema = z.array(z.unknown());
 const recordSchema = z.record(z.string(), z.unknown());
+const YOUTH_CENTER_PAGE_SIZE = 100;
+const MAX_YOUTH_CENTER_PAGES = 1_000;
 
 export type PolicySyncSourceResult = Readonly<{
   source: "youth_center" | "gov24";
@@ -93,12 +95,30 @@ function logFailedItem(
   });
 }
 
+async function fetchAllYouthCenterPolicies(): Promise<unknown[]> {
+  const records: unknown[] = [];
+
+  for (let pageNum = 1; pageNum <= MAX_YOUTH_CENTER_PAGES; pageNum += 1) {
+    const payload = await fetchYouthCenterPolicies({
+      pageNum,
+      pageSize: YOUTH_CENTER_PAGE_SIZE,
+    });
+    const pageRecords = responseRecords(payload);
+    records.push(...pageRecords);
+
+    if (pageRecords.length < YOUTH_CENTER_PAGE_SIZE) {
+      return records;
+    }
+  }
+
+  throw new Error("온통청년 정책 페이지 수가 허용된 최대치를 초과했습니다");
+}
+
 async function syncYouthCenter(
   client: SupabaseClient,
 ): Promise<PolicySyncSourceResult> {
   try {
-    const payload = await fetchYouthCenterPolicies({ pageNum: 1, pageSize: 100 });
-    const records = responseRecords(payload);
+    const records = await fetchAllYouthCenterPolicies();
     let upserted = 0;
     let failed = 0;
 

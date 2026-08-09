@@ -34,7 +34,7 @@ flowchart LR
 - 공개 정책과 사용자 데이터의 접근 통제는 Supabase RLS를 마지막 방어선으로 사용한다.
 - 운영용 데이터 모델을 별도로 만들지 않고 Vercel·Supabase·Resend 로그를 활용한다.
 - 외부 정책 원본 전체는 저장하지 않고 정규화된 정책과 출처 참조만 보존한다.
-- 온통청년 정책 동기화는 `https://www.youthcenter.go.kr/go/ythip/getPlcy`에 `apiKeyNm`, `pageNum`, `pageSize`, `rtnType=json`을 사용한다.
+- 온통청년 정책 동기화는 `https://www.youthcenter.go.kr/go/ythip/getPlcy`에 `apiKeyNm`, `pageNum`, `pageSize`, `rtnType=json`을 사용하고 마지막 페이지까지 순회한다.
 
 ## 2. 주요 도메인
 
