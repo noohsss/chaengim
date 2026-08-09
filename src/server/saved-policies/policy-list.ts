@@ -49,6 +49,21 @@ export type SavedPolicyListParams = Readonly<{
   status?: string;
 }>;
 
+export async function listSavedPolicyIds(
+  client: SupabaseClient,
+): Promise<ReadonlySet<string>> {
+  const { data, error } = await client
+    .from("saved_policies")
+    .select("policy_id");
+
+  if (error) throw new Error(`챙긴 정책을 확인하지 못했습니다: ${error.message}`);
+
+  const parsed = z.array(z.object({ policy_id: z.uuid() })).safeParse(data);
+  if (!parsed.success) throw new Error("챙긴 정책 식별자 형식이 올바르지 않습니다");
+
+  return new Set(parsed.data.map((item) => item.policy_id));
+}
+
 export async function listSavedPolicies(
   client: SupabaseClient,
   params: SavedPolicyListParams = {},

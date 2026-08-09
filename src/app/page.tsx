@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { countUnreadNotifications } from "@/server/notifications/notification-repository";
+import { listSavedPolicyIds } from "@/server/saved-policies/policy-list";
 import Image from "next/image";
 import Link from "next/link";
 import { z } from "zod";
@@ -97,6 +98,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const unreadNotificationCount = isAuthenticated
     ? await countUnreadNotifications(supabase)
     : 0;
+  const savedPolicyIds = isAuthenticated
+    ? await listSavedPolicyIds(supabase)
+    : new Set<string>();
 
   return (
     <main className="ui-page overflow-hidden">
@@ -365,6 +369,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     category={policy.category}
                     href={`/policies/${policy.id}`}
                     isRolling={policy.is_rolling}
+                    isSaved={savedPolicyIds.has(policy.id)}
                     supportContent={policy.support_content}
                     title={policy.title}
                   />
