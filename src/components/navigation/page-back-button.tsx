@@ -25,13 +25,13 @@ export function PageBackButton({ fallbackHref }: PageBackButtonProps): ReactElem
 
   return (
     <button
-      aria-label="이전 화면으로 돌아가기"
-      className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-semibold text-primary transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      aria-label="이전으로 돌아가기"
+      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       onClick={handleClick}
       type="button"
     >
       <ArrowLeft aria-hidden="true" size={18} />
-      이전 화면
+      이전으로 돌아가기
     </button>
   );
 }
