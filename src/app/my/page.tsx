@@ -64,11 +64,11 @@ export default async function MyPage({ searchParams }: MyPageProps) {
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-5xl">
-        <header>
+        <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />
           </Link>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="ui-eyebrow">내 챙김</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">챙긴 정책을 정리해 보세요</h1>
@@ -115,7 +115,7 @@ export default async function MyPage({ searchParams }: MyPageProps) {
               if (!policy) return null;
 
               return (
-                <li className="ui-card p-5" key={item.policy_id}>
+                <li className="ui-card overflow-hidden border-t-4 border-t-[var(--brand-cornflower)] p-5" key={item.policy_id}>
                   <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                     <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">{categoryLabels[policy.category]}</span>
                     <span className="inline-flex items-center gap-1"><CalendarDays aria-hidden="true" size={14} />{formatDeadline(policy)}</span>

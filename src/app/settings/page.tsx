@@ -103,7 +103,7 @@ export default async function SettingsPage({
           </Link>
         </header>
 
-        <div className="mt-10">
+        <div className="mt-10 rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
           <p className="ui-eyebrow">내 정보</p>
           <h1 className="mt-2 text-3xl font-semibold leading-9 tracking-[-0.04em]">
             내 정보
@@ -127,7 +127,7 @@ export default async function SettingsPage({
         ) : null}
 
         <form action={updateProfile} className="mt-6 space-y-6">
-          <section className="ui-card p-6">
+          <section className="ui-card border-t-4 border-t-[var(--brand-cornflower)] p-6">
             <h2 className="text-lg font-medium">기본 프로필</h2>
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
               <label className="grid gap-2 text-sm font-medium">
@@ -180,7 +180,7 @@ export default async function SettingsPage({
             </div>
           </section>
 
-          <section className="ui-card p-6">
+          <section className="ui-card border-t-4 border-t-[var(--brand-mint)] p-6">
             <h2 className="text-lg font-medium">이메일 알림</h2>
             <p className="mt-2 break-all text-sm text-muted-foreground">
               {profile.notification_email ?? "연결된 이메일이 없어요."}

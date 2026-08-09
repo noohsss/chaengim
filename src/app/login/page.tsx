@@ -49,12 +49,15 @@ export default async function LoginPage({
     <main className="ui-page flex items-center justify-center px-6 py-12">
       <section
         aria-labelledby="login-title"
-        className="ui-card w-full max-w-md p-6 sm:p-8"
+        className="ui-card w-full max-w-md overflow-hidden p-0"
       >
-        <BrandLogo priority />
-        <div className="mt-8">
+        <div className="bg-[var(--brand-sky)] p-6 sm:p-8">
+          <BrandLogo priority />
+          <p className="ui-eyebrow mt-8">안전하게 이어가기</p>
+        </div>
+        <div className="p-6 sm:p-8">
           <h1
-            className="text-[1.375rem] font-medium leading-7 tracking-[-0.025em]"
+            className="text-2xl font-semibold leading-8 tracking-[-0.04em]"
             id="login-title"
           >
             필요한 혜택을 계속 챙겨 보세요
@@ -64,6 +67,7 @@ export default async function LoginPage({
           </p>
         </div>
 
+        <div className="p-6 sm:p-8">
         {errorMessage ? (
           <p
             className="ui-status-error mt-6 px-4 py-3 text-sm"
@@ -99,6 +103,7 @@ export default async function LoginPage({
         <p className="mt-4 text-center text-xs leading-4 text-muted-foreground">
           로그인하면 챙긴 정책과 진행 상태를 안전하게 저장할 수 있어요.
         </p>
+        </div>
       </section>
     </main>
   );
