@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { SavePolicyButton } from "@/components/policies/save-policy-button";
-import { PageBackButton } from "@/components/navigation/page-back-button";
 import { createLoginPath } from "@/lib/auth/safe-next-path";
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
@@ -100,7 +99,6 @@ export default async function PolicyDetailPage({
   return (
     <main className="ui-page">
       <div className="mx-auto max-w-4xl px-6 py-8 sm:py-12">
-        <PageBackButton fallbackHref="/#policies" />
         <article className="ui-card overflow-hidden border-t-4 border-t-[var(--brand-cornflower)]">
           <header className="border-b border-border px-6 py-8 sm:px-10 sm:py-10">
             <div className="flex items-start justify-between gap-4">

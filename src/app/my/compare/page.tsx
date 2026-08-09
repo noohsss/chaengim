@@ -43,9 +43,11 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-5xl">
-        <PageBackButton fallbackHref="/my" />
         <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
-          <Link aria-label="챙김 홈" href="/"><BrandLogo size="compact" /></Link>
+          <div className="flex items-center justify-between gap-4">
+            <Link aria-label="챙김 홈" href="/"><BrandLogo size="compact" /></Link>
+            <PageBackButton fallbackHref="/my" />
+          </div>
           <p className="ui-eyebrow mt-10">정책 비교</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">챙긴 정책을 나란히 비교해 보세요</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">지원 내용, 조건, 기간의 차이를 정리해 드려요. 최종 자격은 공식 기관에서 확인해 주세요.</p>

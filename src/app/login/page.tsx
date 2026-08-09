@@ -50,15 +50,17 @@ export default async function LoginPage({
   return (
     <main className="ui-page flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
-        <PageBackButton fallbackHref="/" />
         <section
           aria-labelledby="login-title"
-          className="ui-card mt-4 w-full overflow-hidden p-0"
+          className="ui-card w-full overflow-hidden p-0"
         >
-        <div className="bg-[var(--brand-sky)] p-6 sm:p-8">
-          <BrandLogo priority />
+        <header className="bg-[var(--brand-sky)] p-6 sm:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <BrandLogo priority />
+            <PageBackButton fallbackHref="/" />
+          </div>
           <p className="ui-eyebrow mt-8">안전하게 이어가기</p>
-        </div>
+        </header>
         <div className="p-6 sm:p-8">
           <h1
             className="text-2xl font-semibold leading-8 tracking-[-0.04em]"

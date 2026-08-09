@@ -40,9 +40,11 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-4xl">
-        <PageBackButton fallbackHref="/my" />
         <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
-          <Link aria-label="챙김 홈" href="/"><BrandLogo size="compact" /></Link>
+          <div className="flex items-center justify-between gap-4">
+            <Link aria-label="챙김 홈" href="/"><BrandLogo size="compact" /></Link>
+            <PageBackButton fallbackHref="/my" />
+          </div>
           <p className="ui-eyebrow mt-10">내 챙김 분석</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">지금 먼저 확인할 정책을 정리해 드려요</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">챙긴 정책과 관리 정보를 바탕으로 다음 행동을 정리합니다. 최종 자격과 신청 결과는 공식 기관에서 확인해 주세요.</p>

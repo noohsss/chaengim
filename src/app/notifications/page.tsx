@@ -86,14 +86,16 @@ export default async function NotificationsPage({
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-3xl">
-        <PageBackButton fallbackHref="/my" />
         <header className="flex items-center justify-between gap-4">
           <Link aria-label="챙김 홈" href="/">
             <BrandLogo size="compact" />
           </Link>
-          <Link className="ui-secondary-action" href="/my">
-            내 챙김
-          </Link>
+          <div className="flex items-center gap-2">
+            <PageBackButton fallbackHref="/my" />
+            <Link className="ui-secondary-action" href="/my">
+              내 챙김
+            </Link>
+          </div>
         </header>
 
         <section className="mt-10 rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">

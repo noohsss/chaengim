@@ -46,11 +46,13 @@ export default async function MyPage({ searchParams }: MyPageProps) {
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-5xl">
-        <PageBackButton fallbackHref="/" />
         <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
-          <Link aria-label="챙김 홈" href="/">
-            <BrandLogo size="compact" />
-          </Link>
+          <div className="flex items-center justify-between gap-4">
+            <Link aria-label="챙김 홈" href="/">
+              <BrandLogo size="compact" />
+            </Link>
+            <PageBackButton fallbackHref="/" />
+          </div>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="ui-eyebrow">내 챙김</p>
