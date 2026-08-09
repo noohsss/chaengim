@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   normalizeGov24Policy,
   normalizeYouthCenterPolicy,
+  normalizedPolicyToRow,
 } from "../index";
 
 const fixturesDir = join(
@@ -54,6 +55,19 @@ test("normalizes a Youth Center policy into the internal policy shape", async ()
   assert.equal(policy.sourceRefs.youth_center?.externalId, "YC-2026-0001");
   assert.match(policy.eligibility ?? "", /중위소득 150% 이하/);
   assert.match(policy.versionHash, /^[a-f0-9]{64}$/);
+});
+
+test("maps a normalized policy to the policies table shape", async () => {
+  const sourcePolicy = await readFixture("youth-center-policy.json");
+  const row = normalizedPolicyToRow(normalizeYouthCenterPolicy(sourcePolicy));
+
+  assert.equal(row.title, "청년 취업 준비 지원금");
+  assert.equal(row.summary, "구직 청년의 취업 준비 비용을 지원합니다.");
+  assert.equal(row.application_start_date, "2026-05-01");
+  assert.equal(row.application_end_date, "2026-05-31");
+  assert.equal(row.lifecycle_status, "active");
+  assert.deepEqual(row.sources, ["youth_center"]);
+  assert.deepEqual(row.source_refs.youth_center?.externalId, "YC-2026-0001");
 });
 
 async function readFixture(fileName: string): Promise<unknown> {
