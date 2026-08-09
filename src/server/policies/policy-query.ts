@@ -32,7 +32,7 @@ const publicPolicyDetailRowSchema = publicPolicyRowSchema.extend({
   application_method: z.string().nullable(),
   application_url: z.url().nullable(),
   contact: z.string().nullable(),
-  last_synced_at: z.iso.datetime(),
+  last_synced_at: z.iso.datetime({ offset: true }),
   sources: z.array(z.literal("youth_center")),
   source_refs: z.object({
     youth_center: z
