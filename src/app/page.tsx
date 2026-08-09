@@ -359,6 +359,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               {policies.map((policy) => (
                 <li key={policy.id}>
                   <PolicySummaryCard
+                    actionLabel="상세 보기"
                     applicationEndDate={policy.application_end_date}
                     applicationPeriodText={policy.application_period_text}
                     category={policy.category}

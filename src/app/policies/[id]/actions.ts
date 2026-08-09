@@ -37,7 +37,7 @@ export async function updateSavedPolicy(formData: FormData): Promise<never> {
   } catch (error) {
     if (error instanceof SavedPolicyError) {
       if (error.code === "authentication_required") {
-        redirect(createLoginPath(getSafeNextPath(policyPath)));
+        redirect(createLoginPath(getSafeNextPath(policyPath), "login_required"));
       }
 
       redirect(`${policyPath}?status=save_failed`);
