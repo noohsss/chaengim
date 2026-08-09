@@ -62,6 +62,9 @@ export default async function MyPage({ searchParams }: MyPageProps) {
               <Link className="ui-secondary-action" href="/my/analysis">
                 내 챙김 분석
               </Link>
+              <Link className="ui-secondary-action" href="/my/compare">
+                정책 비교
+              </Link>
             </div>
           </div>
         </header>

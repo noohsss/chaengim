@@ -38,11 +38,12 @@ const savedAnalysisRowSchema = z.object({
     application_url: z.url().nullable(),
     organization_name: z.string().nullable(),
     contact: z.string().nullable(),
+    category: z.enum(["jobs_startup", "housing", "education", "finance", "welfare_culture", "participation_rights", "other"]),
     version_hash: z.string(),
   }).nullable(),
 });
 
-type SavedAnalysisRow = z.infer<typeof savedAnalysisRowSchema>;
+export type SavedAnalysisRow = z.infer<typeof savedAnalysisRowSchema>;
 
 const responseJsonSchema = {
   type: "object",
@@ -94,15 +95,20 @@ async function getUserId(client: SupabaseClient): Promise<string> {
   return userId.data;
 }
 
-async function getSavedPolicies(client: SupabaseClient): Promise<readonly SavedAnalysisRow[]> {
+export async function listSavedPoliciesForAi(client: SupabaseClient): Promise<readonly SavedAnalysisRow[]> {
   const { data, error } = await client
     .from("saved_policies")
-    .select("policy_id,status,priority,memo,policies(id,title,summary,support_content,eligibility,application_start_date,application_end_date,application_period_text,is_rolling,application_method,application_url,organization_name,contact,version_hash)")
+    .select("policy_id,status,priority,memo,policies(id,title,summary,support_content,eligibility,application_start_date,application_end_date,application_period_text,is_rolling,application_method,application_url,organization_name,contact,category,version_hash)")
     .order("updated_at", { ascending: false });
   if (error) throw new AnalysisError("database_error", "챙긴 정책을 불러오지 못했습니다");
   const parsed = z.array(savedAnalysisRowSchema).safeParse(data);
   if (!parsed.success) throw new AnalysisError("database_error", "챙긴 정책 데이터 형식이 올바르지 않습니다");
   const visible = parsed.data.filter((item) => item.policies !== null);
+  return visible;
+}
+
+async function getSavedPolicies(client: SupabaseClient): Promise<readonly SavedAnalysisRow[]> {
+  const visible = await listSavedPoliciesForAi(client);
   if (visible.length === 0) throw new AnalysisError("no_saved_policies", "먼저 분석할 정책을 챙겨 주세요");
   return visible;
 }
