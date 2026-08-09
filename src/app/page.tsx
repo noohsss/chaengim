@@ -15,6 +15,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
+import { countUnreadNotifications } from "@/server/notifications/notification-repository";
 import Image from "next/image";
 import Link from "next/link";
 import { z } from "zod";
@@ -93,6 +94,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const isAuthenticated = z.uuid().safeParse(claimsData?.claims.sub).success;
   const policyPage = await listPublicPolicies(supabase, filters);
   const { policies } = policyPage;
+  const unreadNotificationCount = isAuthenticated
+    ? await countUnreadNotifications(supabase)
+    : 0;
 
   return (
     <main className="ui-page overflow-hidden">
@@ -110,7 +114,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 이용 방법
               </a>
               {isAuthenticated ? (
-                <AccountMenu />
+                <AccountMenu unreadNotificationCount={unreadNotificationCount} />
               ) : (
                 <Link
                   className="ui-primary-action"
