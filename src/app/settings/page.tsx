@@ -9,10 +9,10 @@ import { DeleteAccountForm } from "@/components/settings/delete-account-form";
 import {
   EMPLOYMENT_STATUS_OPTIONS,
   getCurrentSeoulYear,
-  profileSchema,
   REGION_OPTIONS,
 } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
+import { getProfileForUser } from "@/server/profile/profile-repository";
 
 import { updateProfile } from "./actions";
 
@@ -77,16 +77,9 @@ export default async function SettingsPage({
     redirect("/login?next=%2Fsettings");
   }
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, birth_year, region_code, employment_status, notification_email, notification_email_verified_at, email_opt_in, updated_at",
-    )
-    .eq("id", userId.data)
-    .single();
-  const profile = profileSchema.safeParse(data);
+  const profile = await getProfileForUser(supabase, userId.data);
 
-  if (error || !profile.success) {
+  if (!profile) {
     throw new Error("프로필을 불러오지 못했습니다.");
   }
 
@@ -98,8 +91,7 @@ export default async function SettingsPage({
     (_, index) => currentYear - index,
   );
   const isEmailVerified = Boolean(
-    profile.data.notification_email &&
-      profile.data.notification_email_verified_at,
+    profile.notification_email && profile.notification_email_verified_at,
   );
 
   return (
@@ -141,7 +133,7 @@ export default async function SettingsPage({
                 출생연도
                 <select
                   className="min-h-11 rounded-[var(--radius-control)] border bg-white px-3 text-base font-normal sm:text-sm"
-                  defaultValue={profile.data.birth_year ?? ""}
+                  defaultValue={profile.birth_year ?? ""}
                   name="birthYear"
                 >
                   <option value="">선택하지 않음</option>
@@ -157,7 +149,7 @@ export default async function SettingsPage({
                 거주 시도
                 <select
                   className="min-h-11 rounded-[var(--radius-control)] border bg-white px-3 text-base font-normal sm:text-sm"
-                  defaultValue={profile.data.region_code ?? ""}
+                  defaultValue={profile.region_code ?? ""}
                   name="regionCode"
                 >
                   <option value="">선택하지 않음</option>
@@ -173,7 +165,7 @@ export default async function SettingsPage({
                 현재 상태
                 <select
                   className="min-h-11 rounded-[var(--radius-control)] border bg-white px-3 text-base font-normal sm:text-sm"
-                  defaultValue={profile.data.employment_status ?? ""}
+                  defaultValue={profile.employment_status ?? ""}
                   name="employmentStatus"
                 >
                   <option value="">선택하지 않음</option>
@@ -190,12 +182,12 @@ export default async function SettingsPage({
           <section className="rounded-xl border bg-card p-6 shadow-[0_12px_36px_rgba(37,42,51,0.06)]">
             <h2 className="font-medium">이메일 알림</h2>
             <p className="mt-2 break-all text-sm text-muted-foreground">
-              {profile.data.notification_email ?? "연결된 이메일이 없어요."}
+              {profile.notification_email ?? "연결된 이메일이 없어요."}
             </p>
             <label className="mt-5 flex min-h-11 items-start gap-3 rounded-lg bg-muted/60 p-3 text-sm">
               <input
                 className="mt-0.5 size-5 accent-[var(--primary)]"
-                defaultChecked={profile.data.email_opt_in}
+                defaultChecked={profile.email_opt_in}
                 disabled={!isEmailVerified}
                 name="emailOptIn"
                 type="checkbox"
