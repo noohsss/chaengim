@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { z } from "zod";
 
 const categoryLabels: Readonly<Record<string, string>> = {
   jobs_startup: "일자리·창업",
@@ -93,7 +94,10 @@ function formatDeadline(policy: {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const filters = toSearchParams(await searchParams);
-  const policyPage = await listPublicPolicies(await createClient(), filters);
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const isAuthenticated = z.uuid().safeParse(claimsData?.claims.sub).success;
+  const policyPage = await listPublicPolicies(supabase, filters);
   const { policies } = policyPage;
 
   return (
@@ -123,9 +127,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </Link>
               <Link
                 className="flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover)] active:bg-[var(--primary-pressed)]"
-                href="/login"
+                href={isAuthenticated ? "/my" : "/login"}
               >
-                로그인
+                {isAuthenticated ? "내 챙김" : "로그인"}
               </Link>
             </div>
           </nav>
