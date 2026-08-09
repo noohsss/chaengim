@@ -16,6 +16,7 @@
   },
   "packageManager": "npm@11.16.0",
   "dependencies": {
+    "@google/genai": "^2.16.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.2",
     "clsx": "^2.1.1",

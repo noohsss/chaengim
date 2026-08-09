@@ -17,6 +17,11 @@ const cronEnvSchema = z.object({
   CRON_SECRET: z.string().min(1),
 });
 
+const geminiEnvSchema = z.object({
+  GEMINI_API_KEY: z.string().min(1),
+  GEMINI_MODEL: z.string().trim().min(1).default("gemini-3.5-flash-lite"),
+});
+
 export type SupabaseAdminEnv = z.infer<typeof supabaseAdminEnvSchema>;
 
 export function getSupabaseAdminEnv(): SupabaseAdminEnv {
@@ -36,4 +41,13 @@ export function getPublicApiEnv(): PublicApiEnv {
 
 export function getCronEnv(): { CRON_SECRET: string } {
   return cronEnvSchema.parse({ CRON_SECRET: process.env.CRON_SECRET });
+}
+
+export type GeminiEnv = z.infer<typeof geminiEnvSchema>;
+
+export function getGeminiEnv(): GeminiEnv {
+  return geminiEnvSchema.parse({
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_MODEL: process.env.GEMINI_MODEL,
+  });
 }
