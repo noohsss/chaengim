@@ -15,6 +15,10 @@ const publicApiEnvSchema = z.object({
   GOV24_API_BASE_URL: z.url().default("https://api.odcloud.kr/api/gov24/v3"),
 });
 
+const cronEnvSchema = z.object({
+  CRON_SECRET: z.string().min(1),
+});
+
 export type SupabaseAdminEnv = z.infer<typeof supabaseAdminEnvSchema>;
 
 export function getSupabaseAdminEnv(): SupabaseAdminEnv {
@@ -32,4 +36,8 @@ export function getPublicApiEnv(): PublicApiEnv {
     GOV24_API_KEY: process.env.GOV24_API_KEY,
     GOV24_API_BASE_URL: process.env.GOV24_API_BASE_URL,
   });
+}
+
+export function getCronEnv(): { CRON_SECRET: string } {
+  return cronEnvSchema.parse({ CRON_SECRET: process.env.CRON_SECRET });
 }
