@@ -158,9 +158,21 @@ export function PolicySummaryCard({
     <article className="ui-card overflow-hidden transition-shadow hover:shadow-[0_1rem_3rem_rgba(37,42,51,0.1)]">
       <div className="grid sm:grid-cols-[minmax(0,1fr)_8.5rem]">
         <div className="min-w-0 px-5 py-5 sm:px-6 sm:py-6">
-          <span className="inline-flex min-h-7 items-center rounded-full bg-secondary px-3 text-xs font-semibold text-secondary-foreground">
-            {categoryLabel}
-          </span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="inline-flex min-h-7 items-center rounded-full bg-secondary px-3 text-xs font-semibold text-secondary-foreground">
+              {categoryLabel}
+            </span>
+            <span
+              aria-label={isSaved ? "챙긴 정책" : "아직 안 챙긴 정책"}
+              className={`inline-flex min-h-7 shrink-0 items-center rounded-full border px-3 text-xs font-semibold ${
+                isSaved
+                  ? "border-[var(--brand-mint)] bg-[var(--brand-mint)] text-accent-foreground"
+                  : "border-border bg-[var(--brand-light-gray)] text-muted-foreground"
+              }`}
+            >
+              {isSaved ? "챙긴 정책" : "아직 안 챙긴 정책"}
+            </span>
+          </div>
           <h4 className="mt-3 line-clamp-2 text-[1.375rem] font-medium leading-7 tracking-[-0.025em]">
             <Link className="transition-colors hover:text-primary" href={href}>
               {title}
