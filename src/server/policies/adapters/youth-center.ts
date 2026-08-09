@@ -82,7 +82,7 @@ export function normalizeYouthCenterPolicy(input: unknown): NormalizedPolicy {
     applicationEndDate: dateRange.endDate,
     applicationPeriodText,
     isRolling: dateRange.isRolling,
-    applicationMethod: policy.plcyAplyMthdCn,
+    applicationMethod: firstText(policy.plcyAplyMthdCn),
     applicationUrl,
     organizationName: firstText(policy.sprvsnInstCdNm, policy.operInstCdNm),
     contact: firstText(policy.inqCnt),

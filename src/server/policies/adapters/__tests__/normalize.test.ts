@@ -57,6 +57,20 @@ test("normalizes a Youth Center policy into the internal policy shape", async ()
   assert.match(policy.versionHash, /^[a-f0-9]{64}$/);
 });
 
+test("omits an empty Youth Center application method", async () => {
+  const sourcePolicy = await readFixture("youth-center-policy.json");
+  if (!isRecord(sourcePolicy)) {
+    throw new TypeError("Youth Center fixture must be an object");
+  }
+
+  const policy = normalizeYouthCenterPolicy({
+    ...sourcePolicy,
+    plcyAplyMthdCn: "",
+  });
+
+  assert.equal(policy.applicationMethod, undefined);
+});
+
 test("maps a normalized policy to the policies table shape", async () => {
   const sourcePolicy = await readFixture("youth-center-policy.json");
   const row = normalizedPolicyToRow(normalizeYouthCenterPolicy(sourcePolicy));
@@ -73,4 +87,8 @@ test("maps a normalized policy to the policies table shape", async () => {
 async function readFixture(fileName: string): Promise<unknown> {
   const contents = await readFile(join(fixturesDir, fileName), "utf8");
   return JSON.parse(contents) as unknown;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
