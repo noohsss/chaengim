@@ -9,8 +9,10 @@ import {
   joinTextSections,
   mapCategory,
   mapRegionCodes,
+  mapYouthCenterEligibilityCodes,
   optionalUrl,
   parseDateRange,
+  youthCenterEligibilityLabels,
 } from "./normalize-utils";
 
 export const youthCenterPolicySchema = z
@@ -71,10 +73,34 @@ export function normalizeYouthCenterPolicy(input: unknown): NormalizedPolicy {
       ["지원대상", policy.sprtTrgtCn],
       ["연령", policy.ageInfo],
       ["소득", policy.earnCndCn],
-      ["전공", policy.plcyMajorCd],
-      ["취업상태", policy.jobCd],
-      ["학력", policy.schoolCd],
-      ["특화분야", policy.sBizCd ?? policy.sbizCd],
+      [
+        "전공",
+        mapYouthCenterEligibilityCodes(
+          policy.plcyMajorCd,
+          youthCenterEligibilityLabels.major,
+        ),
+      ],
+      [
+        "취업상태",
+        mapYouthCenterEligibilityCodes(
+          policy.jobCd,
+          youthCenterEligibilityLabels.job,
+        ),
+      ],
+      [
+        "학력",
+        mapYouthCenterEligibilityCodes(
+          policy.schoolCd,
+          youthCenterEligibilityLabels.school,
+        ),
+      ],
+      [
+        "특화분야",
+        mapYouthCenterEligibilityCodes(
+          policy.sBizCd ?? policy.sbizCd,
+          youthCenterEligibilityLabels.specialized,
+        ),
+      ],
       ["추가 신청 자격", policy.addAplyQlfcCndCn],
       ["참여 제한", policy.ptcpPrpTrgtCn],
     ]),

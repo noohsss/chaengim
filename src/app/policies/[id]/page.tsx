@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
+import { formatYouthCenterEligibility } from "@/server/policies/adapters/normalize-utils";
 import {
   getPublicPolicy,
   type PublicPolicyDetail,
@@ -109,7 +110,10 @@ export default async function PolicyDetailPage({ params }: PolicyPageProps) {
           <div className="grid gap-10 px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[1fr_260px]">
             <div className="space-y-9">
               <DetailSection title="지원 내용" value={policy.support_content} />
-              <DetailSection title="신청 조건" value={policy.eligibility} />
+              <DetailSection
+                title="신청 조건"
+                value={formatYouthCenterEligibility(policy.eligibility) ?? null}
+              />
               <DetailSection title="신청 방법" value={policy.application_method} />
             </div>
 

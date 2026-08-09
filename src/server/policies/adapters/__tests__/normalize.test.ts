@@ -44,6 +44,22 @@ test("omits an empty Youth Center application method", async () => {
   assert.equal(policy.applicationMethod, undefined);
 });
 
+test("maps Youth Center eligibility codes to readable labels", async () => {
+  const sourcePolicy = await readFixture("youth-center-policy.json");
+  const policy = normalizeYouthCenterPolicy({
+    ...asRecord(sourcePolicy),
+    plcyMajorCd: "0011009",
+    jobCd: "0013003",
+    schoolCd: "0049007",
+    sbizCd: "0014010",
+  });
+
+  assert.match(policy.eligibility ?? "", /전공\n제한없음/);
+  assert.match(policy.eligibility ?? "", /취업상태\n미취업자/);
+  assert.match(policy.eligibility ?? "", /학력\n대학 졸업/);
+  assert.match(policy.eligibility ?? "", /특화분야\n제한없음/);
+});
+
 test("maps a normalized policy to the policies table shape", async () => {
   const sourcePolicy = await readFixture("youth-center-policy.json");
   const row = normalizedPolicyToRow(normalizeYouthCenterPolicy(sourcePolicy));
@@ -81,6 +97,14 @@ test("keeps a policy active through its application deadline", async () => {
 async function readFixture(fileName: string): Promise<unknown> {
   const contents = await readFile(join(fixturesDir, fileName), "utf8");
   return JSON.parse(contents) as unknown;
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  if (!isRecord(value)) {
+    throw new TypeError("Youth Center fixture must be an object");
+  }
+
+  return value;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
