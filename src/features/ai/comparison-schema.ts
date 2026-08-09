@@ -19,6 +19,11 @@ export const comparisonResultSchema = z.object({
   })).min(3).max(8),
   priorityPolicy: citedPolicySchema,
   needsConfirmation: z.array(citedPolicySchema).max(10),
+  policyAssessments: z.array(z.object({
+    policyId: z.uuid(),
+    strengths: z.array(z.string().trim().min(1).max(500)).min(1).max(3),
+    cautions: z.array(z.string().trim().min(1).max(500)).min(1).max(3),
+  })).max(3).default([]),
 });
 
 export type ComparisonResult = z.infer<typeof comparisonResultSchema>;

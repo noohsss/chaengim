@@ -12,6 +12,20 @@ type AnalysisPageProps = Readonly<{ searchParams: Promise<Record<string, string 
 
 function firstParam(value: string | string[] | undefined): string | undefined { return Array.isArray(value) ? value[0] : value; }
 
+const priorityLabels: Readonly<Record<string, string>> = { high: "높음", normal: "보통", low: "낮음" };
+const statusLabels: Readonly<Record<string, string>> = {
+  interested: "관심",
+  reviewing: "확인 중",
+  planning_to_apply: "신청 예정",
+  applied: "신청 완료",
+  result_recorded: "결과 기록",
+};
+const fitStatusLabels = {
+  matches: "확인된 조건",
+  needs_confirmation: "확인 필요",
+  potential_mismatch: "불일치 가능성",
+} as const;
+
 export default async function AnalysisPage({ searchParams }: AnalysisPageProps) {
   const params = await searchParams;
   const status = firstParam(params.status);
@@ -43,12 +57,32 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
             <form action={requestAnalysis}><button className="ui-primary-action" type="submit">{analysis ? "다시 분석하기" : "분석 시작하기"}</button></form>
           </div>
 
-          {result ? <div className="mt-8 grid gap-6">
+          {result && analysis ? <div className="mt-8 grid gap-8">
             <p className="rounded-[var(--radius-control)] bg-secondary/60 p-4 text-sm leading-6">{result.overview}</p>
-            {result.priorityPolicy ? <section><h3 className="font-semibold">먼저 확인할 정책</h3><p className="mt-2 text-sm leading-6"><strong>{analysis?.policyTitles[result.priorityPolicy.policyId] ?? "정책"}</strong> · {result.priorityPolicy.reason}</p></section> : null}
-            {result.urgentPolicies.length > 0 ? <section><h3 className="font-semibold">마감이 가까운 정책</h3><ul className="mt-2 grid gap-2 text-sm leading-6">{result.urgentPolicies.map((item) => <li key={item.policyId}><strong>{analysis?.policyTitles[item.policyId] ?? "정책"}</strong> · {item.reason}</li>)}</ul></section> : null}
-            {result.needsConfirmation.length > 0 ? <section><h3 className="font-semibold">추가 확인이 필요한 조건</h3><ul className="mt-2 grid gap-2 text-sm leading-6">{result.needsConfirmation.map((item) => <li key={`${item.policyId}-${item.reason}`}><strong>{analysis?.policyTitles[item.policyId] ?? "정책"}</strong> · {item.reason}</li>)}</ul></section> : null}
-            {result.nextSteps.length > 0 ? <section><h3 className="font-semibold">다음 단계</h3><ol className="mt-2 grid gap-2 text-sm leading-6">{result.nextSteps.map((step) => <li key={step}>{step}</li>)}</ol></section> : null}
+
+            {analysis.profileMissingFields.length > 0 ? <aside className="rounded-[var(--radius-control)] border border-border p-4 text-sm leading-6"><strong>개인화에 필요한 정보:</strong> {analysis.profileMissingFields.join(", ")}가 비어 있어 일부 조건은 확인 필요로 표시됩니다. <Link className="font-medium text-primary" href="/settings">프로필 채우기</Link></aside> : null}
+
+            <section>
+              <div className="flex items-end justify-between gap-4"><div><p className="ui-eyebrow">오늘의 행동 순서</p><h3 className="mt-1 text-xl font-semibold">먼저 확인할 정책</h3></div><span className="text-xs text-muted-foreground">우선순위와 마감 기준</span></div>
+              <ol className="mt-4 grid gap-4">
+                {analysis.policyFacts.map((fact, index) => {
+                  const aiReason = result.priorityPolicy?.policyId === fact.id
+                    ? result.priorityPolicy.reason
+                    : result.urgentPolicies.find((item) => item.policyId === fact.id)?.reason;
+                  const recommendedAction = result.recommendedActions.find((item) => item.policyId === fact.id);
+                  return <li className="rounded-[var(--radius-control)] border border-border p-5" key={fact.id}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-xs font-semibold text-primary">{index + 1}순위 · {statusLabels[fact.status] ?? fact.status} · 우선순위 {priorityLabels[fact.priority] ?? fact.priority}</p><h4 className="mt-1 text-lg font-semibold">{fact.title}</h4>{aiReason ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{aiReason}</p> : null}</div><span className="shrink-0 rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-primary">{fact.deadlineLabel}</span></div>
+                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2"><div><dt className="font-semibold">신청 기간</dt><dd className="mt-1 text-muted-foreground">{fact.applicationPeriod}</dd></div><div><dt className="font-semibold">지원 내용</dt><dd className="mt-1 text-muted-foreground">{fact.supportContent}</dd></div><div className="sm:col-span-2"><dt className="font-semibold">확인할 조건</dt><dd className="mt-1 whitespace-pre-line text-muted-foreground">{fact.eligibility}</dd></div></dl>
+                    {recommendedAction ? <p className="mt-4 rounded-[var(--radius-control)] bg-[var(--brand-mint)] p-3 text-sm leading-6"><strong>{recommendedAction.action}</strong> · {recommendedAction.reason}</p> : null}
+                    <div className="mt-4 flex flex-wrap gap-2"><Link className="ui-secondary-action" href={`/policies/${fact.id}`}>상세 조건 확인</Link>{fact.applicationUrl ? <a className="ui-primary-action" href={fact.applicationUrl} rel="noreferrer" target="_blank">공식 페이지 열기</a> : null}</div>
+                  </li>;
+                })}
+              </ol>
+            </section>
+
+            {result.fitChecks.length > 0 ? <section><h3 className="text-lg font-semibold">프로필 기준 조건 점검</h3><ul className="mt-3 grid gap-3 sm:grid-cols-2">{result.fitChecks.map((check) => <li className="rounded-[var(--radius-control)] border border-border p-4" key={`${check.policyId}-${check.criterion}`}><p className="text-xs font-semibold text-primary">{fitStatusLabels[check.status]}</p><p className="mt-1 font-semibold">{analysis.policyTitles[check.policyId] ?? "정책"} · {check.criterion}</p><p className="mt-2 text-sm leading-6 text-muted-foreground">{check.reason}</p></li>)}</ul></section> : result.needsConfirmation.length > 0 ? <section><h3 className="text-lg font-semibold">추가 확인이 필요한 조건</h3><ul className="mt-2 grid gap-2 text-sm leading-6">{result.needsConfirmation.map((item) => <li key={`${item.policyId}-${item.reason}`}><strong>{analysis.policyTitles[item.policyId] ?? "정책"}</strong> · {item.reason}</li>)}</ul></section> : null}
+
+            {result.recommendedActions.length === 0 && result.nextSteps.length > 0 ? <section><h3 className="text-lg font-semibold">다음 단계</h3><ol className="mt-2 grid gap-2 text-sm leading-6">{result.nextSteps.map((step, index) => <li key={`${index}-${step}`}>{index + 1}. {step}</li>)}</ol></section> : null}
           </div> : null}
         </section>
         <Link className="mt-6 inline-flex text-sm font-medium text-primary" href="/my">내 챙김으로 돌아가기</Link>
