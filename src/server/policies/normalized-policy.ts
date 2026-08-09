@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import { z } from "zod";
 
-export const policySourceSchema = z.enum(["youth_center", "gov24"]);
+export const policySourceSchema = z.literal("youth_center");
 export const policyCategorySchema = z.enum([
   "jobs_startup",
   "housing",
@@ -37,27 +37,17 @@ export const normalizedPolicySchema = z
     sources: z.array(policySourceSchema).min(1),
     sourceRefs: z.object({
       youth_center: sourceRefSchema.optional(),
-      gov24: sourceRefSchema.optional(),
     }),
     versionHash: z.string().trim().min(1),
   })
   .superRefine((policy, ctx) => {
     const hasYouthCenter = policy.sources.includes("youth_center");
-    const hasGov24 = policy.sources.includes("gov24");
 
     if (hasYouthCenter !== Boolean(policy.sourceRefs.youth_center)) {
       ctx.addIssue({
         code: "custom",
         message: "sources and sourceRefs.youth_center must match",
         path: ["sourceRefs", "youth_center"],
-      });
-    }
-
-    if (hasGov24 !== Boolean(policy.sourceRefs.gov24)) {
-      ctx.addIssue({
-        code: "custom",
-        message: "sources and sourceRefs.gov24 must match",
-        path: ["sourceRefs", "gov24"],
       });
     }
 

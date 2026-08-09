@@ -19,7 +19,7 @@ const YOUTH_CENTER_PAGE_SIZE = 100;
 const MAX_YOUTH_CENTER_PAGES = 1_000;
 
 export type PolicySyncSourceResult = Readonly<{
-  source: "youth_center" | "gov24";
+  source: "youth_center";
   fetched: number;
   upserted: number;
   failed: number;

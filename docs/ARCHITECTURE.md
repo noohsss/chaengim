@@ -1,6 +1,6 @@
 # 챙김 MVP 아키텍처
 
-> 최종 갱신: 2026-08-08
+> 최종 갱신: 2026-08-09
 > 기준 문서: [`PLAN.md`](./PLAN.md)
 > 범위: 주요 도메인, 페이지 구조, 데이터 모델, 실행 책임, 외부 API 및 AI 데이터 흐름
 
@@ -14,14 +14,12 @@ flowchart LR
     N["Next.js / Vercel"]
     S["Supabase Auth + PostgreSQL"]
     Y["온통청년 API"]
-    G["정부24 혜택 API"]
     A["Gemini API"]
     R["Resend"]
 
     U -->|"페이지 조회·사용자 입력"| N
     N -->|"세션·정책·사용자 데이터"| S
     N -->|"일일 정책 동기화"| Y
-    N -.->|"일시 비활성화"| G
     N -->|"분석·비교 요청"| A
     N -->|"마감 이메일"| R
     R -->|"이메일"| U
@@ -58,7 +56,7 @@ flowchart LR
 
 책임:
 
-- 온통청년 정책의 공통 형식 제공 (정부24 동기화는 일시 비활성화)
+- 온통청년 정책의 공통 형식 제공
 - 키워드, 카테고리, 지역 검색
 - 신청 가능 정책의 마감 임박순 정렬
 - 정책 상세와 공식 신청처 제공
@@ -118,9 +116,9 @@ flowchart LR
 
 책임:
 
-- 온통청년 API 호출 (정부24 동기화는 인증 문제로 일시 비활성화)
-- 출처별 응답을 공통 정책 타입으로 변환
-- 중복 후보를 하나의 대표 정책으로 통합
+- 온통청년 API 호출
+- 응답을 공통 정책 타입으로 변환
+- 외부 ID 기준으로 기존 정책을 갱신
 - 정책 upsert, 비활성화, 버전 해시 갱신
 - 저장 정책의 주요 변경에 대한 알림 생성
 
@@ -204,7 +202,7 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 - 신청 정보: 시작일, 종료일, 원문 기간, 상시 여부, 방법, 공식 URL
 - 기관 정보: `organization_name`, `contact`
 - 탐색 정보: `category`, `region_codes text[]`, `lifecycle_status`
-- 출처 정보: `sources text[]`, `source_refs jsonb`
+- 출처 정보: `sources text[]` (`youth_center`만 사용), `source_refs jsonb`
 - 동기화 정보: `version_hash`, `last_synced_at`
 - 공통 시각: `created_at`, `updated_at`
 
@@ -252,7 +250,7 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 서버 전용 요소:
 
 - Supabase `service_role` 키
-- 온통청년·정부24 인증키
+- 온통청년 인증키
 - Gemini API 키
 - Resend API 키
 - Vercel Cron secret
@@ -275,7 +273,6 @@ OAuth 가입 시 자동 생성한다. 사용자는 자신의 프로필만 읽고
 src/server/policies/
 ├── adapters/
 │   ├── youth-center.ts
-│   └── gov24.ts
 ├── normalize.ts
 ├── deduplicate.ts
 ├── sync.ts
@@ -304,8 +301,7 @@ flowchart LR
 - 두 출처는 독립적으로 호출해 한쪽 실패가 다른 쪽 결과를 막지 않게 한다.
 - 목록·상세·지원조건처럼 분리된 응답은 어댑터 내부에서 결합한다.
 - 외부 필드명과 코드 체계는 어댑터 밖으로 노출하지 않는다.
-- 정규화 이후 정책명·기관·기간·지역이 충분히 일치할 때만 통합한다.
-- 애매한 항목은 잘못 합치기보다 별도 정책으로 유지한다.
+- 외부 ID가 같은 정책은 갱신하고 다른 ID는 별도 정책으로 유지한다.
 - 처리 건수와 오류는 구조화된 Vercel 로그로 남긴다.
 - Cron 요청은 secret을 검증하고 재실행해도 같은 결과가 되도록 upsert한다.
 

@@ -92,7 +92,7 @@ OAuth 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
 
 ## 5. `policies`
 
-온통청년과 정부24 데이터를 공통 형식으로 정규화하고 중복 통합한 대표 정책이다.
+온통청년 데이터를 공통 형식으로 정규화한 대표 정책이다.
 
 ### 컬럼
 
@@ -113,8 +113,8 @@ OAuth 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
 | `contact` | `text` | Y | |
 | `category` | `policy_category` | N | `other` |
 | `region_codes` | `text[]` | N | 기본값 `{'00'}` |
-| `sources` | `text[]` | N | `youth_center`, `gov24`만 허용 |
-| `source_refs` | `jsonb` | N | 출처별 외부 ID와 원문 URL |
+| `sources` | `text[]` | N | `youth_center`만 허용 |
+| `source_refs` | `jsonb` | N | 온통청년 외부 ID와 원문 URL |
 | `lifecycle_status` | `policy_lifecycle_status` | N | `active` |
 | `version_hash` | `text` | N | 정규화된 핵심 필드 해시 |
 | `last_synced_at` | `timestamptz` | N | `now()` |
@@ -129,10 +129,6 @@ OAuth 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
   "youth_center": {
     "externalId": "policy-123",
     "url": "https://example.go.kr/policy/123"
-  },
-  "gov24": {
-    "externalId": "service-456",
-    "url": "https://example.go.kr/service/456"
   }
 }
 ```
@@ -142,18 +138,17 @@ OAuth 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
 - PK: `id`
 - FK 없음
 - `region_codes`와 `sources`는 비어 있거나 `NULL` 원소를 포함할 수 없다.
-- `sources`는 `youth_center`, `gov24`만 포함한다.
-- `source_refs`는 JSON object이며 두 출처 외의 키를 허용하지 않는다.
+- `sources`는 `youth_center`만 포함한다.
+- `source_refs`는 JSON object이며 `youth_center` 키만 허용한다.
 - `sources`와 `source_refs`의 출처가 일치해야 한다.
 - 신청 종료일은 시작일보다 빠를 수 없다.
 - `version_hash`는 unique가 아니다.
 
 ### Unique
 
-각 공공 API의 외부 ID에 partial expression unique index를 적용한다.
+온통청년 외부 ID에 partial expression unique index를 적용한다.
 
 - `source_refs #>> '{youth_center,externalId}'`
-- `source_refs #>> '{gov24,externalId}'`
 
 별도 출처 테이블 없이도 동일 외부 정책이 둘 이상의 대표 정책에 연결되는 것을 방지한다.
 
@@ -164,7 +159,7 @@ OAuth 로그인 사용자의 최소 프로필과 이메일 알림 설정이다.
 - `GIN(region_codes)`: 지역 포함 필터
 - `(lifecycle_status, application_end_date)`: 활성 정책 마감순
 - `(category, lifecycle_status, application_end_date)`: 카테고리 탐색
-- 출처별 외부 ID partial unique index 2개
+- 온통청년 외부 ID partial unique index
 
 ### RLS와 권한
 
