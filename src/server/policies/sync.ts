@@ -99,10 +99,18 @@ async function fetchAllYouthCenterPolicies(): Promise<unknown[]> {
   const records: unknown[] = [];
 
   for (let pageNum = 1; pageNum <= MAX_YOUTH_CENTER_PAGES; pageNum += 1) {
-    const payload = await fetchYouthCenterPolicies({
-      pageNum,
-      pageSize: YOUTH_CENTER_PAGE_SIZE,
-    });
+    let payload: Record<string, unknown>;
+    try {
+      payload = await fetchYouthCenterPolicies({
+        pageNum,
+        pageSize: YOUTH_CENTER_PAGE_SIZE,
+      });
+    } catch (error) {
+      throw new Error(
+        `온통청년 ${pageNum}페이지 요청 실패: ${errorMessage(error)}`,
+        { cause: error },
+      );
+    }
     const pageRecords = responseRecords(payload);
     records.push(...pageRecords);
 

@@ -25,7 +25,27 @@ const publicPolicyRowSchema = z.object({
   organization_name: z.string().nullable(),
 });
 
+const publicPolicyDetailRowSchema = publicPolicyRowSchema.extend({
+  application_start_date: z.iso.date().nullable(),
+  support_content: z.string().nullable(),
+  eligibility: z.string().nullable(),
+  application_method: z.string().nullable(),
+  application_url: z.url().nullable(),
+  contact: z.string().nullable(),
+  last_synced_at: z.iso.datetime(),
+  sources: z.array(z.literal("youth_center")),
+  source_refs: z.object({
+    youth_center: z
+      .object({
+        externalId: z.string().trim().min(1),
+        url: z.url().optional(),
+      })
+      .optional(),
+  }),
+});
+
 export type PublicPolicy = z.infer<typeof publicPolicyRowSchema>;
+export type PublicPolicyDetail = z.infer<typeof publicPolicyDetailRowSchema>;
 
 export type PolicySearchParams = Readonly<{
   search?: string;
@@ -115,4 +135,32 @@ export async function listPublicPolicies(
     totalCount,
     totalPages: Math.ceil(totalCount / pageSize),
   };
+}
+
+export async function getPublicPolicy(
+  client: SupabaseClient,
+  id: string,
+): Promise<PublicPolicyDetail | null> {
+  const parsedId = z.uuid().safeParse(id);
+  if (!parsedId.success) return null;
+
+  const { data, error } = await client
+    .from("policies")
+    .select(
+      "id,title,summary,support_content,eligibility,application_start_date,application_end_date,application_period_text,is_rolling,application_method,application_url,organization_name,contact,category,region_codes,sources,source_refs,last_synced_at",
+    )
+    .eq("id", parsedId.data)
+    .eq("lifecycle_status", "active")
+    .or(
+      `application_end_date.is.null,is_rolling.eq.true,application_end_date.gte.${todayInSeoul()}`,
+    )
+    .maybeSingle();
+
+  if (error) throw new Error(`정책 상세를 불러오지 못했습니다: ${error.message}`);
+  if (!data) return null;
+
+  const parsed = publicPolicyDetailRowSchema.safeParse(data);
+  if (!parsed.success) throw new Error("정책 상세 데이터 형식이 올바르지 않습니다");
+
+  return parsed.data;
 }

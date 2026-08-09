@@ -388,7 +388,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-md"
                   key={policy.id}
                 >
-                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <Link
+                    className="block rounded-xl focus-visible:outline-none"
+                    href={`/policies/${policy.id}`}
+                  >
+                    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                     <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">
                       {categoryLabels[policy.category]}
                     </span>
@@ -396,17 +400,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                       <CalendarDays aria-hidden="true" size={14} />
                       {formatDeadline(policy)}
                     </span>
-                  </div>
-                  <h4 className="mt-3 text-lg font-semibold">{policy.title}</h4>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                    {policy.summary ?? "지원 내용을 확인해 보세요."}
-                  </p>
-                  {policy.organization_name ? (
-                    <p className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin aria-hidden="true" size={14} />
-                      {policy.organization_name}
+                    </div>
+                    <h4 className="mt-3 text-lg font-semibold">{policy.title}</h4>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                      {policy.summary ?? "지원 내용을 확인해 보세요."}
                     </p>
-                  ) : null}
+                    {policy.organization_name ? (
+                      <p className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin aria-hidden="true" size={14} />
+                        {policy.organization_name}
+                      </p>
+                    ) : null}
+                  </Link>
                 </li>
               ))}
             </ul>
