@@ -1,13 +1,14 @@
 import {
-  Bookmark,
-  BookmarkCheck,
   CalendarDays,
   ExternalLink,
   MapPin,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { z } from "zod";
 
+import { SavePolicyButton } from "@/components/policies/save-policy-button";
+import { createLoginPath } from "@/lib/auth/safe-next-path";
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
 import { createClient } from "@/lib/supabase/server";
 import { formatYouthCenterEligibility } from "@/server/policies/adapters/normalize-utils";
@@ -90,6 +91,9 @@ export default async function PolicyDetailPage({
   if (!policy) notFound();
 
   const isSaved = await isPolicySaved(client, id);
+  const { data: claimsData } = await client.auth.getClaims();
+  const isAuthenticated = z.uuid().safeParse(claimsData?.claims.sub).success;
+  const policyPath = `/policies/${policy.id}`;
   const status = firstParam((await searchParams).status);
   const sourceUrl = policy.source_refs.youth_center?.url;
 
@@ -105,23 +109,13 @@ export default async function PolicyDetailPage({
                 </span>
                 <span className="text-muted-foreground">온통청년</span>
               </div>
-              <form action={updateSavedPolicy} className="shrink-0">
-                <input name="intent" type="hidden" value={isSaved ? "remove" : "save"} />
-                <input name="policyId" type="hidden" value={policy.id} />
-                <button
-                  aria-label={isSaved ? "챙기기 취소" : "챙기기"}
-                  aria-pressed={isSaved}
-                  className="group flex min-h-16 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs font-semibold text-primary transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  type="submit"
-                >
-                  {isSaved ? (
-                    <BookmarkCheck aria-hidden="true" fill="currentColor" size={25} />
-                  ) : (
-                    <Bookmark aria-hidden="true" size={25} />
-                  )}
-                  <span>{isSaved ? "챙기기 취소" : "챙기기"}</span>
-                </button>
-              </form>
+              <SavePolicyButton
+                isAuthenticated={isAuthenticated}
+                isSaved={isSaved}
+                loginPath={createLoginPath(policyPath)}
+                onSave={updateSavedPolicy}
+                policyId={policy.id}
+              />
             </div>
             <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
               {policy.title}
