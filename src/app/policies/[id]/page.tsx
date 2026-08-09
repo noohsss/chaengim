@@ -1,6 +1,5 @@
-import { ArrowLeft, CalendarDays, ExternalLink, MapPin } from "lucide-react";
+import { CalendarDays, ExternalLink, MapPin } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { REGION_OPTIONS } from "@/features/profile/profile-schema";
@@ -91,15 +90,7 @@ export default async function PolicyDetailPage({
   return (
     <main className="min-h-screen bg-[var(--brand-off-white)]">
       <div className="mx-auto max-w-4xl px-6 py-8 sm:py-12">
-        <Link
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          href="/#policies"
-        >
-          <ArrowLeft aria-hidden="true" size={17} />
-          정책 목록으로
-        </Link>
-
-        <article className="mt-6 overflow-hidden rounded-3xl border border-border bg-card shadow-[0_16px_50px_rgba(37,42,51,0.07)]">
+        <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_16px_50px_rgba(37,42,51,0.07)]">
           <header className="border-b border-border px-6 py-8 sm:px-10 sm:py-10">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="rounded-full bg-secondary px-3 py-1 font-semibold text-secondary-foreground">
