@@ -98,22 +98,23 @@ export default async function SettingsPage({
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-2xl">
-        <header className="flex items-center justify-between gap-4">
-          <Link aria-label="챙김 홈" href="/">
-            <BrandLogo size="compact" />
-          </Link>
-          <PageBackButton fallbackHref="/" />
+        <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <Link aria-label="챙김 홈" href="/">
+              <BrandLogo size="compact" />
+            </Link>
+            <PageBackButton fallbackHref="/" />
+          </div>
+          <div className="mt-10">
+            <p className="ui-eyebrow">내 정보</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
+              내 정보
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              입력한 정보는 정책을 살펴보고 챙길 때만 사용해요.
+            </p>
+          </div>
         </header>
-
-        <div className="mt-10 rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
-          <p className="ui-eyebrow">내 정보</p>
-          <h1 className="mt-2 text-3xl font-semibold leading-9 tracking-[-0.04em]">
-            내 정보
-          </h1>
-          <p className="mt-2 text-sm leading-5 text-muted-foreground">
-            입력한 정보는 정책을 살펴보고 챙길 때만 사용해요.
-          </p>
-        </div>
 
         {statusMessage ? (
           <p

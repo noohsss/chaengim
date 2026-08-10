@@ -86,23 +86,17 @@ export default async function NotificationsPage({
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-3xl">
-        <header className="flex items-center justify-between gap-4">
-          <Link aria-label="챙김 홈" href="/">
-            <BrandLogo size="compact" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <PageBackButton fallbackHref="/my" />
-            <Link className="ui-secondary-action" href="/my">
-              내 챙김
+        <header className="rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <Link aria-label="챙김 홈" href="/">
+              <BrandLogo size="compact" />
             </Link>
+            <PageBackButton fallbackHref="/my" />
           </div>
-        </header>
-
-        <section className="mt-10 rounded-[var(--radius)] bg-[var(--brand-sky)] p-6 sm:p-8">
-          <p className="ui-eyebrow">알림함</p>
-          <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-[-0.04em]">
+              <p className="ui-eyebrow">알림함</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
                 놓치지 않도록 알려드릴게요
               </h1>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -117,7 +111,7 @@ export default async function NotificationsPage({
               </form>
             ) : null}
           </div>
-        </section>
+        </header>
 
         {statusMessage ? (
           <p
