@@ -1,4 +1,5 @@
 import type { ComparisonResult } from "@/features/ai/comparison-schema";
+import { replaceAiDisplayCodes } from "./display-text";
 
 type PolicyTitles = Readonly<Record<string, string>>;
 
@@ -20,29 +21,31 @@ export function replacePolicyIdsWithTitles(value: string, policyTitles: PolicyTi
 }
 
 export function normalizeComparisonText(result: ComparisonResult, policyTitles: PolicyTitles): ComparisonResult {
+  const normalize = (value: string) => replaceAiDisplayCodes(replacePolicyIdsWithTitles(value, policyTitles));
   return {
     ...result,
-    overview: replacePolicyIdsWithTitles(result.overview, policyTitles),
+    overview: normalize(result.overview),
     comparisonRows: result.comparisonRows.map((row) => ({
       ...row,
+      label: normalize(row.label),
       values: row.values.map((item) => ({
         ...item,
-        value: replacePolicyIdsWithTitles(item.value, policyTitles),
+        value: normalize(item.value),
       })),
-      difference: replacePolicyIdsWithTitles(row.difference, policyTitles),
+      difference: normalize(row.difference),
     })),
     priorityPolicy: {
       ...result.priorityPolicy,
-      reason: replacePolicyIdsWithTitles(result.priorityPolicy.reason, policyTitles),
+      reason: normalize(result.priorityPolicy.reason),
     },
     needsConfirmation: result.needsConfirmation.map((item) => ({
       ...item,
-      reason: replacePolicyIdsWithTitles(item.reason, policyTitles),
+      reason: normalize(item.reason),
     })),
     policyAssessments: result.policyAssessments.map((item) => ({
       ...item,
-      strengths: item.strengths.map((text) => replacePolicyIdsWithTitles(text, policyTitles)),
-      cautions: item.cautions.map((text) => replacePolicyIdsWithTitles(text, policyTitles)),
+      strengths: item.strengths.map(normalize),
+      cautions: item.cautions.map(normalize),
     })),
   };
 }
