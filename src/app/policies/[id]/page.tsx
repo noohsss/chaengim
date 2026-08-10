@@ -111,7 +111,7 @@ export default async function PolicyDetailPage({
               <SavePolicyButton
                 isAuthenticated={isAuthenticated}
                 isSaved={isSaved}
-                loginPath={createLoginPath(`/policies/${policy.id}`)}
+                loginPath={createLoginPath("/")}
                 onSave={updateSavedPolicy}
                 policyId={policy.id}
               />
