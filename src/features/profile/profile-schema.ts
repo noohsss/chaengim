@@ -44,7 +44,6 @@ export function createProfileUpdateSchema(currentYear: number) {
       emptyStringToNull,
       z.coerce.number().int().min(1900).max(currentYear).nullable(),
     ),
-    emailOptIn: z.boolean(),
     employmentStatus: z.preprocess(
       emptyStringToNull,
       employmentStatusSchema.nullable(),

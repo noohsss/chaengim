@@ -36,7 +36,6 @@ export async function updateProfile(formData: FormData): Promise<never> {
     getCurrentSeoulYear(),
   ).safeParse({
     birthYear: formData.get("birthYear"),
-    emailOptIn: formData.get("emailOptIn") === "on",
     employmentStatus: formData.get("employmentStatus"),
     regionCode: formData.get("regionCode"),
   });
@@ -53,27 +52,10 @@ export async function updateProfile(formData: FormData): Promise<never> {
 
   const supabase = await createClient();
 
-  if (profileInput.data.emailOptIn) {
-    const { data: emailProfile, error: emailProfileError } = await supabase
-      .from("profiles")
-      .select("notification_email, notification_email_verified_at")
-      .eq("id", userId)
-      .single();
-
-    if (
-      emailProfileError ||
-      !emailProfile?.notification_email ||
-      !emailProfile.notification_email_verified_at
-    ) {
-      redirect("/settings?status=email_unverified");
-    }
-  }
-
   const { error } = await supabase
     .from("profiles")
     .update({
       birth_year: profileInput.data.birthYear,
-      email_opt_in: profileInput.data.emailOptIn,
       employment_status: profileInput.data.employmentStatus,
       region_code: profileInput.data.regionCode,
     })

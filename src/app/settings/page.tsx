@@ -26,10 +26,6 @@ type SettingsPageProps = Readonly<{
 }>;
 
 const STATUS_MESSAGES = {
-  email_unverified: {
-    message: "인증된 이메일이 있어야 마감 알림을 받을 수 있어요.",
-    tone: "error",
-  },
   invalid: {
     message: "입력한 프로필 정보를 다시 확인해 주세요.",
     tone: "error",
@@ -49,7 +45,6 @@ const STATUS_MESSAGES = {
 } as const;
 
 const statusSchema = z.enum([
-  "email_unverified",
   "invalid",
   "save_failed",
   "sign_out_failed",
@@ -91,10 +86,6 @@ export default async function SettingsPage({
     { length: currentYear - 1899 },
     (_, index) => currentYear - index,
   );
-  const isEmailVerified = Boolean(
-    profile.notification_email && profile.notification_email_verified_at,
-  );
-
   return (
     <main className="ui-page px-6 py-8 sm:py-12">
       <div className="ui-shell max-w-2xl">
@@ -181,30 +172,6 @@ export default async function SettingsPage({
                 </select>
               </label>
             </div>
-          </section>
-
-          <section className="ui-card border-t-4 border-t-[var(--brand-mint)] p-6">
-            <h2 className="text-lg font-medium">이메일 알림</h2>
-            <p className="mt-2 break-all text-sm text-muted-foreground">
-              {profile.notification_email ?? "연결된 이메일이 없어요."}
-            </p>
-            <label className="mt-5 flex min-h-11 items-start gap-3 rounded-lg bg-muted/60 p-3 text-sm">
-              <input
-                className="mt-0.5 size-5 accent-[var(--primary)]"
-                defaultChecked={profile.email_opt_in}
-                disabled={!isEmailVerified}
-                name="emailOptIn"
-                type="checkbox"
-              />
-              <span>
-                마감 알림 이메일 받기
-                <span className="mt-1 block text-xs leading-4 text-muted-foreground">
-                  {isEmailVerified
-                    ? "챙긴 정책의 마감 7일 전과 1일 전에 알려드려요."
-                    : "Google에서 인증된 이메일이 확인되지 않았어요."}
-                </span>
-              </span>
-            </label>
           </section>
 
           <div className="flex justify-end">
